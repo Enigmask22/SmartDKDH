@@ -1,0 +1,93 @@
+# Dependencies
+node_modules/
+*/node_modules/
+home-app/node_modules/
+frontend/
+backend/__pycache__/
+backend/*/__pycache__/
+backend/*/*/__pycache__/
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+home-app/.env
+home-app/.env.*
+backend/.env
+backend/.env.*
+
+# Build files
+dist/
+build/
+*/dist/
+*/build/
+home-app/.expo/
+home-app/dist/
+home-app/web-build/
+home-app/expo-env.d.ts
+frontend/dist/
+frontend/dist-ssr/
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+logs/
+*.log
+
+# Editor directories and files
+.vscode/
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Mobile specific
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+
+# TypeScript
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.env
+.venv
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Temporary files
+.tmp/
+.temp/
+.cache/
+
+# Expo
+.expo/
+web-build/
+expo-env.d.ts
+.metro-health-check*
+
+# Project specific
+app-example/
