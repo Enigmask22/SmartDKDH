@@ -10,7 +10,7 @@ from pydantic import BaseModel
 import uvicorn
 from dotenv import load_dotenv
 load_dotenv()
-from MongoDB.user_dal import User, UserDAL
+from MongoDB.User.user_dal import User, UserDAL
 
 COLLECTION_NAME = "user"
 MONGODB_URI = os.getenv("MONGODB_URI")

@@ -15,8 +15,9 @@ from Device import sensor_controller  # Import module mới
 import app_state
 
 # Import server_mongo router và init_db
-from MongoDB.server_mongo import router as mongo_router, init_db, get_user_dal
-from MongoDB.user_dal import UserDAL, User
+from MongoDB.server_mongo import router as mongo_router, init_db
+from MongoDB.User.user_dal import UserDAL
+from MongoDB.server_mongo import get_user_dal
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -67,8 +68,9 @@ app.include_router(led_controller.router)
 app.include_router(fan_controller.router)
 app.include_router(sensor_controller.router)  # Thêm router mới
 
-# Thêm router thay vì mount
-app.include_router(mongo_router)
+# Thêm router chính của MongoDB (đã bao gồm user_api_router)
+# Prefix /api sẽ được áp dụng cho tất cả các route trong mongo_router
+app.include_router(mongo_router, prefix="/api")
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -157,7 +159,7 @@ async def speech_to_text(audio: UploadFile = File(...)):
 @app.post("/init-adafruit-connection")
 async def init_adafruit_connection(user_no: int, user_dal: UserDAL = Depends(get_user_dal)):
     try:
-        # Lấy thông tin user từ database
+        # Lấy thông tin user từ database thông qua DAL đã được inject
         user = await user_dal.get_user(user_no)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
@@ -221,6 +223,7 @@ async def init_adafruit_connection(user_no: int, user_dal: UserDAL = Depends(get
     except HTTPException as e:
         raise e
     except Exception as e:
+        print(f"Lỗi trong init_adafruit_connection: {e}") # Log lỗi chi tiết hơn
         raise HTTPException(status_code=500, detail=f"Error initializing Adafruit connection: {str(e)}")
 
 if __name__ == "__main__":
