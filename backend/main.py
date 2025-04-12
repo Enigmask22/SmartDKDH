@@ -9,9 +9,9 @@ import speech_recognition as sr
 from pydub import AudioSegment
 
 # Import các module đã tách
-import led_controller
-import fan_controller
-import sensor_controller  # Import module mới
+from Device import led_controller
+from Device import fan_controller
+from Device import sensor_controller  # Import module mới
 import app_state
 
 # Import server_mongo router và init_db
