@@ -16,7 +16,7 @@ import app_state
 
 # Import server_mongo router và init_db
 from MongoDB.server_mongo import router as mongo_router, init_db, get_user_dal
-from MongoDB.dal import UserDAL, User
+from MongoDB.user_dal import UserDAL, User
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
