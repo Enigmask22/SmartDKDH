@@ -15,8 +15,8 @@ from Device import sensor_controller  # Import module mới
 import app_state
 
 # Import server_mongo router và init_db
-from server_mongo import router as mongo_router, init_db, get_user_dal
-from dal import UserDAL, User
+from MongoDB.server_mongo import router as mongo_router, init_db, get_user_dal
+from MongoDB.dal import UserDAL, User
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
