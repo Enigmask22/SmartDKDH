@@ -56,8 +56,10 @@ const LoginScreen = () => {
       // Đăng nhập thành công
       if (responseData.success && responseData.user_no !== undefined) {
         const userNo = responseData.user_no;
-        // Lưu user_no vào AsyncStorage
+        // Lưu user_no, email và password vào AsyncStorage
         await AsyncStorage.setItem("user_no", JSON.stringify(userNo));
+        await AsyncStorage.setItem("user_email", email);
+        await AsyncStorage.setItem("user_password", password);
         console.log("Đã lưu user_no:", userNo);
 
         // Điều hướng đến màn hình chính (tabs), thay thế màn hình login trong stack
