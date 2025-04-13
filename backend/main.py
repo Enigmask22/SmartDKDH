@@ -9,6 +9,7 @@ import speech_recognition as sr
 from pydub import AudioSegment
 from pydantic import BaseModel, EmailStr
 from typing import Optional
+import logging
 
 # Import các module đã tách
 from Device import led_controller
@@ -25,24 +26,26 @@ from MongoDB.server_mongo import get_user_dal
 from MongoDB.server_mongo import get_user_log_dal
 from MongoDB.UserLog.user_log_dal import UserLogDAL # Sửa đường dẫn import
 
+# === Cấu hình Logging cơ bản ===
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__) # Tạo logger cho main.py
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     mongo_client = None
-    print("--- Vercel Log: Lifespan startup initiated ---")
+    logger.info("--- Vercel Log: Lifespan startup initiated ---")
     try:
-        print("--- Vercel Log: Calling init_db from lifespan ---")
+        logger.info("--- Vercel Log: Calling init_db from lifespan ---")
         mongo_client = await init_db()
-        # Thêm log xác nhận thành công NGAY SAU init_db
-        print(f"--- Vercel Log: init_db call successful. mongo_client is {'SET' if mongo_client else 'NOT SET'}")
+        logger.info(f"--- Vercel Log: init_db call successful. mongo_client is {'SET' if mongo_client else 'NOT SET'}")
     except Exception as e:
-        print(f"--- Vercel Log: CRITICAL ERROR during lifespan startup (init_db failed): {type(e).__name__} - {e} ---")
-        # Raise lại lỗi để làm server crash, giúp Vercel log lỗi rõ hơn
+        logger.critical(f"--- Vercel Log: CRITICAL ERROR during lifespan startup (init_db failed): {type(e).__name__} - {e} ---", exc_info=True)
+        # Raise lại lỗi để làm server crash
         raise RuntimeError(f"Failed to initialize database during startup: {e}") from e
-        # print("--- Vercel Log: Proceeding lifespan startup despite init_db error ---") # Comment dòng này đi
 
-    print("--- Vercel Log: Lifespan startup finished (init_db likely succeeded), yielding control ---")
+    logger.info("--- Vercel Log: Lifespan startup finished, yielding control ---")
     yield
-    print("--- Vercel Log: Lifespan shutdown initiated ---")
+    logger.info("--- Vercel Log: Lifespan shutdown initiated ---")
     # Shutdown - ngắt kết nối các thiết bị nếu có
     for device in app_state.led_devices.values():
         if hasattr(device, 'mqtt_service') and device.mqtt_service:
@@ -58,17 +61,16 @@ async def lifespan(app: FastAPI):
     
     # Đóng kết nối MongoDB
     if mongo_client:
-        print("--- Vercel Log: Closing MongoDB client ---")
+        logger.info("--- Vercel Log: Closing MongoDB client ---")
         mongo_client.close()
     else:
-        print("--- Vercel Log: No MongoDB client to close ---")
-    print("--- Vercel Log: Lifespan shutdown finished ---")
+        logger.warning("--- Vercel Log: No MongoDB client to close (likely due to startup error) ---")
+    logger.info("--- Vercel Log: Lifespan shutdown finished ---")
 
 app = FastAPI(debug=True, lifespan=lifespan)
 
 origins = [
-    os.getenv("IP_ADDRESS"),
-    os.getenv("EXPO_IP_ADDRESS")
+    "*" # Vẫn giữ để cho phép mọi nguồn gốc (OK nếu có auth tốt)
 ]
 
 app.add_middleware(
@@ -90,7 +92,9 @@ app.include_router(mongo_router, prefix="/api")
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
+    logger.info("WebSocket client connecting...")
     await websocket.accept()
+    logger.info("WebSocket client connected.")
     try:
         while True:
             led_statuses = {
@@ -112,10 +116,13 @@ async def websocket_endpoint(websocket: WebSocket):
             })
             await asyncio.sleep(1)
     except Exception as e:
-        print(f"WebSocket error: {e}")
+        logger.error(f"WebSocket error: {e}", exc_info=True)
+    finally:
+        logger.info("WebSocket client disconnected.")
 
 @app.post("/speech-to-text")
 async def speech_to_text(audio: UploadFile = File(...)):
+    logger.info("Received request for /speech-to-text")
     try:
         # Đọc file audio
         content = await audio.read()
@@ -129,7 +136,7 @@ async def speech_to_text(audio: UploadFile = File(...)):
         with open(temp_audio_path, 'wb') as f:
             f.write(content)
         
-        print(f"Saved audio to: {temp_audio_path}")
+        logger.info(f"Saved audio to: {temp_audio_path}")
 
         # Kiểm tra file tồn tại
         if not os.path.exists(temp_audio_path):
@@ -137,10 +144,13 @@ async def speech_to_text(audio: UploadFile = File(...)):
 
         # Chuyển đổi m4a sang wav
         try:
+            logger.info("Attempting audio conversion...")
             audio_segment = AudioSegment.from_file(temp_audio_path, format="m4a")
             audio_segment.export(temp_wav_path, format="wav")
+            logger.info("Audio conversion successful.")
         except Exception as e:
-            print(f"Detailed error: {str(e)}")
+            logger.error(f"Audio conversion failed: {e}", exc_info=True)
+            logger.warning("This might be due to missing ffmpeg/avconv in the Vercel environment.")
             raise Exception(f"Error converting audio: {str(e)}")
 
         # Nhận dạng giọng nói
@@ -167,9 +177,10 @@ async def speech_to_text(audio: UploadFile = File(...)):
             elif "giảm" in normalized_text:
                 command_type = "fan_decrease"
         
+        logger.info(f"Speech-to-text result: {text}")
         return {"text": text, "command_type": command_type}
     except Exception as e:
-        print(f"Error processing audio: {e}")
+        logger.error(f"Error processing audio: {e}", exc_info=True)
         return {"error": str(e)}
 
 # --- Model mới cho request body của API login/init ---
@@ -184,18 +195,14 @@ async def init_adafruit_connection(
     user_dal: UserDAL = Depends(get_user_dal),
     user_log_dal: UserLogDAL = Depends(get_user_log_dal)
 ):
-    # --- Cảnh báo Bảo mật ---
-    # Logic so sánh mật khẩu dưới đây đang dùng văn bản thuần.
-    # Cần thay thế bằng việc so sánh hash mật khẩu (ví dụ: sử dụng passlib).
-    # ---
+    logger.info(f"Received request for /init-adafruit-connection for email: {request_body.email}")
     user: Optional[User] = None # Khởi tạo user là None
     try:
         # 1. Xác thực người dùng
         user = await user_dal.get_user_by_email(request_body.email)
 
         if user is None:
-            # Thêm log để biết user không được tìm thấy
-            print(f"DEBUG: Không tìm thấy user với email: '{request_body.email}'")
+            logger.warning(f"Login attempt failed: Email not found '{request_body.email}'")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Email hoặc mật khẩu không chính xác.",
@@ -205,14 +212,15 @@ async def init_adafruit_connection(
         # !!! So sánh mật khẩu plaintext - RẤT KHÔNG AN TOÀN !!!
 
         # === Thêm log để debug ===
-        print("-" * 20)
-        print(f"DEBUG: Password từ Request : '{request_body.password}' (Length: {len(request_body.password)})")
-        print(f"DEBUG: Password từ Database: '{user.password}' (Length: {len(user.password)})")
-        print(f"DEBUG: So sánh bằng (==)   : {request_body.password == user.password}")
-        print("-" * 20)
+        logger.info("-" * 20)
+        logger.info(f"DEBUG: Password từ Request : '{request_body.password}' (Length: {len(request_body.password)})")
+        logger.info(f"DEBUG: Password từ Database: '{user.password}' (Length: {len(user.password)})")
+        logger.info(f"DEBUG: So sánh bằng (==)   : {request_body.password == user.password}")
+        logger.info("-" * 20)
         # === Kết thúc log debug ===
 
         if request_body.password != user.password:
+             logger.warning(f"Login attempt failed: Incorrect password for user {user.no}")
              await user_log_dal.create_log(user_no=user.no, activity="Login attempt failed (incorrect password)", status="Failed")
              raise HTTPException(
                  status_code=status.HTTP_401_UNAUTHORIZED,
@@ -234,7 +242,7 @@ async def init_adafruit_connection(
 
         # 3. Ngắt kết nối cũ (Giữ nguyên logic)
         # ... (copy code ngắt kết nối từ phiên bản trước) ...
-        print("Disconnecting existing devices...")
+        logger.info("Disconnecting existing devices...")
         for device_collection in [app_state.led_devices, app_state.fan_devices, app_state.sensor_devices]:
              for device_id, device in list(device_collection.items()):
                 if hasattr(device, 'mqtt_service') and device.mqtt_service:
@@ -242,17 +250,17 @@ async def init_adafruit_connection(
                         if device.mqtt_service.client.is_connected():
                             device.mqtt_service.client.disconnect()
                             device.mqtt_service.client.loop_stop()
-                        print(f"Disconnected old device: {device_id}")
+                        logger.info(f"Disconnected old device: {device_id}")
                     except Exception as disconnect_error:
-                        print(f"Error disconnecting device {device_id}: {disconnect_error}")
+                        logger.error(f"Error disconnecting device {device_id}: {disconnect_error}")
                 if device_id in device_collection: # Kiểm tra lại trước khi xóa
                    del device_collection[device_id]
-        print("Finished disconnecting old devices.")
+        logger.info("Finished disconnecting old devices.")
 
 
         # 4. Khởi tạo kết nối mới (Giữ nguyên logic)
         # ... (copy code khởi tạo kết nối LED, Fan, Sensor từ phiên bản trước) ...
-        print(f"Initializing new connections for user {user_no}...")
+        logger.info(f"Initializing new connections for user {user_no}...")
         # LED devices
         try:
             led_feeds = await led_controller.fetch_led_feeds(username_adafruit, key_adafruit)
@@ -260,9 +268,9 @@ async def init_adafruit_connection(
                 app_state.led_devices[feed_id] = led_controller.LEDDevice(
                     feed_id, description, last_value, username_adafruit, key_adafruit
                 )
-            print(f"Initialized {len(led_feeds)} LED devices.")
+            logger.info(f"Initialized {len(led_feeds)} LED devices.")
         except Exception as e:
-            print(f"Error fetching/initializing LED feeds: {e}")
+            logger.error(f"Error fetching/initializing LED feeds: {e}", exc_info=True)
 
         # Fan devices
         try:
@@ -271,9 +279,9 @@ async def init_adafruit_connection(
                  app_state.fan_devices[feed_id] = fan_controller.FanDevice(
                      feed_id, description, last_value, username_adafruit, key_adafruit
                  )
-            print(f"Initialized {len(fan_feeds)} Fan devices.")
+            logger.info(f"Initialized {len(fan_feeds)} Fan devices.")
         except Exception as e:
-             print(f"Error fetching/initializing Fan feeds: {e}")
+             logger.error(f"Error fetching/initializing Fan feeds: {e}", exc_info=True)
 
         # Sensor devices
         try:
@@ -282,12 +290,13 @@ async def init_adafruit_connection(
                  app_state.sensor_devices[feed_id] = sensor_controller.SensorDevice(
                      feed_id, description, last_value, unit, username_adafruit, key_adafruit
                  )
-            print(f"Initialized {len(sensor_feeds)} Sensor devices.")
+            logger.info(f"Initialized {len(sensor_feeds)} Sensor devices.")
         except Exception as e:
-             print(f"Error fetching/initializing Sensor feeds: {e}")
+             logger.error(f"Error fetching/initializing Sensor feeds: {e}", exc_info=True)
 
 
         # 5. Ghi log thành công
+        logger.info(f"Login successful for user {user_no}. Initiating Adafruit connection...")
         await user_log_dal.create_log(
             user_no=user_no,
             activity="Adafruit connection initialized successfully",
@@ -312,10 +321,16 @@ async def init_adafruit_connection(
              await user_log_dal.create_log(user_no=(user.no if user else -1), activity="Initiating Adafruit connection", status="Failed", device_name=f"HTTP {he.status_code}: {he.detail}")
         raise he # Re-raise lỗi HTTP
     except Exception as e:
-        print(f"Unexpected error in init_adafruit_connection for email {request_body.email}: {e}")
+        logger.critical(f"Unexpected error in init_adafruit_connection for email {request_body.email}: {e}", exc_info=True)
         # Ghi log lỗi không mong đợi
         await user_log_dal.create_log(user_no=(user.no if user else -1), activity="Initiating Adafruit connection", status="Error", device_name=str(e))
         raise HTTPException(status_code=500, detail=f"Đã xảy ra lỗi không mong đợi: {str(e)}")
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # Phần này không chạy trên Vercel
+    new_port = 8001
+    logger.info(f"Attempting to start local server on 0.0.0.0:{new_port}")
+    try:
+         uvicorn.run("main:app", host="0.0.0.0", port=new_port, reload=True) # Thêm reload=True cho dev
+    except OSError as e:
+         logger.critical(f"Error starting local server on port {new_port}: {e}", exc_info=True)
