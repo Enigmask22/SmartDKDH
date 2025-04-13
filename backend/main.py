@@ -328,7 +328,7 @@ async def init_adafruit_connection(
 
 if __name__ == "__main__":
     # Phần này không chạy trên Vercel
-    new_port = 8001
+    new_port = 8000
     logger.info(f"Attempting to start local server on 0.0.0.0:{new_port}")
     try:
          uvicorn.run("main:app", host="0.0.0.0", port=new_port, reload=True) # Thêm reload=True cho dev
