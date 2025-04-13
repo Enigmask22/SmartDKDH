@@ -27,16 +27,22 @@ from MongoDB.UserLog.user_log_dal import UserLogDAL # Sửa đường dẫn impo
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
+    mongo_client = None
+    print("--- Vercel Log: Lifespan startup initiated ---")
     try:
-        # Chỉ khởi tạo MongoDB connection
+        print("--- Vercel Log: Calling init_db from lifespan ---")
         mongo_client = await init_db()
-        print("Connected to MongoDB")
+        # Thêm log xác nhận thành công NGAY SAU init_db
+        print(f"--- Vercel Log: init_db call successful. mongo_client is {'SET' if mongo_client else 'NOT SET'}")
     except Exception as e:
-        print(f"Error initializing MongoDB: {e}")
-    
+        print(f"--- Vercel Log: CRITICAL ERROR during lifespan startup (init_db failed): {type(e).__name__} - {e} ---")
+        # Raise lại lỗi để làm server crash, giúp Vercel log lỗi rõ hơn
+        raise RuntimeError(f"Failed to initialize database during startup: {e}") from e
+        # print("--- Vercel Log: Proceeding lifespan startup despite init_db error ---") # Comment dòng này đi
+
+    print("--- Vercel Log: Lifespan startup finished (init_db likely succeeded), yielding control ---")
     yield
-    
+    print("--- Vercel Log: Lifespan shutdown initiated ---")
     # Shutdown - ngắt kết nối các thiết bị nếu có
     for device in app_state.led_devices.values():
         if hasattr(device, 'mqtt_service') and device.mqtt_service:
@@ -51,8 +57,12 @@ async def lifespan(app: FastAPI):
             device.mqtt_service.client.disconnect()
     
     # Đóng kết nối MongoDB
-    if 'mongo_client' in locals():
+    if mongo_client:
+        print("--- Vercel Log: Closing MongoDB client ---")
         mongo_client.close()
+    else:
+        print("--- Vercel Log: No MongoDB client to close ---")
+    print("--- Vercel Log: Lifespan shutdown finished ---")
 
 app = FastAPI(debug=True, lifespan=lifespan)
 
