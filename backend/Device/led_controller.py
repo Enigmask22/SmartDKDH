@@ -5,8 +5,6 @@ import mqtt_service as mqtt
 import app_state
 import os
 
-ADAFRUIT_USERNAME = os.getenv("ADAFRUIT_USERNAME")
-ADAFRUIT_FEEDS_URL = f"https://io.adafruit.com/api/v2/{ADAFRUIT_USERNAME}/feeds"
 
 class LEDResponse(BaseModel):
     success: bool
@@ -21,8 +19,8 @@ class LEDDevice:
         self.mqtt_service = mqtt.MQTTService(feed_id, initial_status, username, key)
 
 async def fetch_led_feeds(username=None, key=None):
-    username = username or os.getenv("ADAFRUIT_USERNAME")
-    key = key or os.getenv("ADAFRUIT_KEY")
+    username = username
+    key = key
     ADAFRUIT_FEEDS_URL = f"https://io.adafruit.com/api/v2/{username}/feeds"
     
     async with aiohttp.ClientSession() as session:

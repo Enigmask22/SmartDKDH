@@ -27,8 +27,8 @@ class SensorDevice:
 
 # Hàm lấy danh sách feed từ Adafruit
 async def fetch_sensor_feeds(username=None, key=None):
-    username = username or os.getenv("ADAFRUIT_USERNAME")
-    key = key or os.getenv("ADAFRUIT_KEY")
+    username = username
+    key = key
     ADAFRUIT_FEEDS_URL = f"https://io.adafruit.com/api/v2/{username}/feeds"
     
     async with aiohttp.ClientSession() as session:
