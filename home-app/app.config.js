@@ -25,6 +25,10 @@ module.exports = ({ config }) => {
           foregroundImage: "./assets/images/adaptive-icon.png",
           backgroundColor: "#ffffff",
         },
+        config: {
+          usesCleartextTraffic: true,
+        },
+        permissions: ["INTERNET"],
       },
       web: {
         bundler: "metro",

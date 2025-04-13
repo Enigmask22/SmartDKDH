@@ -83,8 +83,8 @@ const ActivityLogScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [currentUserNo, setCurrentUserNo] = useState<number | null>(null); // State lưu user_no
 
-  const backendUrl = `http://${Constants.expoConfig?.extra?.serverIp}:${Constants.expoConfig?.extra?.apiPort}`;
-
+  // const backendUrl = `http://${Constants.expoConfig?.extra?.serverIp}:${Constants.expoConfig?.extra?.apiPort}`;
+  const backendUrl = `https://smartdkdh.onrender.com`;
   // Hàm lấy user_no từ AsyncStorage
   useEffect(() => {
     const getUser = async () => {
