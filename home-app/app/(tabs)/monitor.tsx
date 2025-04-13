@@ -16,7 +16,9 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import { LineChart } from "react-native-chart-kit";
 
 // API configuration
-const API_BASE_URL = `http://${Constants.expoConfig?.extra?.serverIp}:${Constants.expoConfig?.extra?.apiPort}`;
+// const API_BASE_URL = `http://${Constants.expoConfig?.extra?.serverIp}:${Constants.expoConfig?.extra?.apiPort}`;
+const API_BASE_URL = `https://smartdkdh.onrender.com`;
+
 const screenWidth = Dimensions.get("window").width;
 
 export default function MonitorScreen() {
@@ -46,7 +48,8 @@ export default function MonitorScreen() {
 
   // WebSocket connection
   useEffect(() => {
-    const wsUrl = `ws://${serverIp}:8000/ws`;
+    // const wsUrl = `ws://${serverIp}:8000/ws`;
+    const wsUrl = `wss://smartdkdh.onrender.com/ws`;
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
@@ -100,7 +103,8 @@ export default function MonitorScreen() {
 
   const fetchDevices = async () => {
     try {
-      const response = await fetch(`http://${serverIp}:8000/sensor-devices`);
+      // const response = await fetch(`http://${serverIp}:8000/sensor-devices`);
+      const response = await fetch(`${API_BASE_URL}/sensor-devices`);
       const data = await response.json();
       const devices = data.devices;
 

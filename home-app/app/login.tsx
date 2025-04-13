@@ -24,7 +24,8 @@ const LoginScreen = () => {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter(); // Hook điều hướng
 
-  const backendUrl = `http://${Constants.expoConfig?.extra?.serverIp}:${Constants.expoConfig?.extra?.apiPort}`;
+  // const backendUrl = `http://${Constants.expoConfig?.extra?.serverIp}:${Constants.expoConfig?.extra?.apiPort}`;
+  const backendUrl = `https://smartdkdh.onrender.com`;
   const loginApiUrl = `${backendUrl}/init-adafruit-connection`;
 
   const handleLogin = async () => {

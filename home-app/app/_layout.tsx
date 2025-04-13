@@ -14,7 +14,8 @@ export default function RootLayout() {
   const router = useRouter();
 
   // Lấy thông tin URL backend từ cấu hình
-  const backendUrl = `http://${Constants.expoConfig?.extra?.serverIp}:${Constants.expoConfig?.extra?.apiPort}`;
+  // const backendUrl = `http://${Constants.expoConfig?.extra?.serverIp}:${Constants.expoConfig?.extra?.apiPort}`;
+  const backendUrl = `https://smartdkdh.onrender.com`;
   const adafruitApiUrl = `${backendUrl}/init-adafruit-connection`;
 
   // Hàm để khởi tạo kết nối Adafruit

@@ -18,8 +18,8 @@ import { ThemedView } from "@/components/ThemedView";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 // API configuration
-const API_BASE_URL = `http://${Constants.expoConfig?.extra?.serverIp}:${Constants.expoConfig?.extra?.apiPort}`;
-
+// const API_BASE_URL = `http://${Constants.expoConfig?.extra?.serverIp}:${Constants.expoConfig?.extra?.apiPort}`;
+const API_BASE_URL = `https://smartdkdh.onrender.com`;
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const [ledDevices, setLedDevices] = useState<string[]>([]);
@@ -63,7 +63,8 @@ export default function HomeScreen() {
 
   // WebSocket connection
   useEffect(() => {
-    const wsUrl = `ws://${serverIp}:8000/ws`;
+    // const wsUrl = `ws://${serverIp}:8000/ws`;
+    const wsUrl = `wss://smartdkdh.onrender.com/ws`;
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
@@ -140,7 +141,8 @@ export default function HomeScreen() {
 
   const fetchDevices = async () => {
     try {
-      const response = await fetch(`http://${serverIp}:8000/led-devices`);
+      // const response = await fetch(`http://${serverIp}:8000/led-devices`);
+      const response = await fetch(`${API_BASE_URL}/led-devices`);
       const data = await response.json();
       const devices = data.devices;
 
@@ -170,7 +172,8 @@ export default function HomeScreen() {
   const toggleLED = async (deviceId: string, newStatus: string) => {
     try {
       const response = await fetch(
-        `http://${serverIp}:8000/led/${deviceId}/${newStatus}`,
+        // `http://${serverIp}:8000/led/${deviceId}/${newStatus}`,
+        `${API_BASE_URL}/led/${deviceId}/${newStatus}`,
         {
           method: "POST",
           headers: {
@@ -323,7 +326,8 @@ export default function HomeScreen() {
         name: "recording.m4a",
       } as any);
 
-      const url = `http://${serverIp}:8000/speech-to-text`;
+      // const url = `http://${serverIp}:8000/speech-to-text`;
+      const url = `${API_BASE_URL}/speech-to-text`;
       console.log("Sending to URL:", url);
 
       // Thêm timeout và retry logic
@@ -439,7 +443,8 @@ export default function HomeScreen() {
 
       console.log("Sending log data:", logData);
 
-      const response = await fetch(`http://${serverIp}:8000/api/logs`, {
+      // const response = await fetch(`http://${serverIp}:8000/api/logs`, {
+      const response = await fetch(`${API_BASE_URL}/api/logs`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
