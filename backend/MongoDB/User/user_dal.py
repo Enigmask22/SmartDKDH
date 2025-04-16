@@ -82,20 +82,42 @@ class UserDAL:
         response = await self._user_collection.delete_one({"no": no}, session=session)
         return response.deleted_count == 1
 
+    async def get_next_user_no(self, session=None) -> int:
+        """Lấy số no tiếp theo cho người dùng mới"""
+        # Tìm user có no cao nhất
+        result = await self._user_collection.find_one(
+            {},
+            sort=[("no", -1)],  # Sắp xếp giảm dần theo no
+            projection={"no": 1},  # Chỉ lấy trường no
+            session=session
+        )
+        
+        # Nếu không có user nào, bắt đầu từ 1
+        if not result:
+            return 1
+        
+        # Trả về no + 1
+        return result["no"] + 1
+
     async def create_user(
         self,
         # id sẽ được tạo tự động bởi MongoDB hoặc Pydantic nếu cần
-        no: int,
         name: str,
         email: str,
         password: str, # !!! Cần hash mật khẩu trước khi gọi hàm này !!!
         username_adafruit: str,
         key_adafruit: str,
+        no: int = None,  # Tham số no là tùy chọn
         session=None,
     ) -> User | None:
         # --- Cảnh báo Bảo mật ---
         # Mật khẩu được truyền vào đây nên là mật khẩu đã được hash.
         # ---
+        
+        # Nếu không có no, tự động lấy no tiếp theo
+        if no is None:
+            no = await self.get_next_user_no(session)
+        
         user_data = { # Tạo dict thay vì User model trước
             "_id": ObjectId(), # Tạo ObjectId mới
             "no": no,
