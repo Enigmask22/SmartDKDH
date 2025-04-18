@@ -8,13 +8,9 @@ import {
   Alert,
   ImageBackground,
 } from "react-native";
-import Constants from "expo-constants"; // Thêm để lấy cấu hình URL
 
 import { store } from "@/store";
 import { Provider } from "react-redux";
-
-import { StatusBar } from "expo-status-bar";
-
 
 // Ngăn không cho splash screen tự động ẩn đi
 SplashScreen.preventAutoHideAsync();
@@ -128,7 +124,8 @@ export default function RootLayout() {
         router.replace("/(tabs)");
       } else if (isLoggedIn === false) {
         // Đảm bảo người dùng đang ở màn hình login nếu họ chưa đăng nhập
-        router.replace("/onboarding"); // Hoặc "/login" nếu bạn muốn
+        // @type-ignore
+        router.push("/onboarding"); // Hoặc "/login" nếu bạn muốn
       }
       // Nếu isLoggedIn là null, không làm gì cả, đợi useEffect tiếp theo
     }
@@ -154,25 +151,13 @@ export default function RootLayout() {
           và được Expo Router tự động xử lý dựa trên điều hướng.
           Chúng ta không cần khai báo trực tiếp ở đây nếu dùng file-based routing.
         */}
-        <Stack.Screen name="login" />
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="(list)" />
-      </Stack>
-    </Provider>
-    <>
-      <Stack screenOptions={{ headerShown: false }}>
-        {/*
-        Screen cho login và tabs sẽ được định nghĩa trong thư mục app
-        và được Expo Router tự động xử lý dựa trên điều hướng.
-        Chúng ta không cần khai báo trực tiếp ở đây nếu dùng file-based routing.
-        */}
-
         <Stack.Screen name="onboarding" />
         <Stack.Screen name="login" />
         <Stack.Screen name="register" />
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="(list)" />
       </Stack>
-    </>
+    </Provider>
   );
 }
 
