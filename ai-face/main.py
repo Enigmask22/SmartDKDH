@@ -7,8 +7,8 @@
 # from simple_ai import *
 
 # AIO_FEED_ID = ["dadn-door", "dadn-ai"]
-# AIO_USERNAME = "BachbeastCE"
-# AIO_KEY = "aio_XgRq89UmF45Re6LPnROs6Rc9gXF7"
+# AIO_USERNAME = ""
+# AIO_KEY = ""
 # def connected (client):
 #     print (" Ket noi thanh cong ...")
 #     for feed in AIO_FEED_ID:
