@@ -15,7 +15,6 @@ router = APIRouter(
 
 # === Pydantic Models ===
 class NewUser(BaseModel):
-    no: int
     name: str
     email: str
     password: str
@@ -42,10 +41,7 @@ async def get_all_users(user_dal: UserDAL = Depends(get_user_dal)) -> list[User]
 @router.post("", status_code=status.HTTP_201_CREATED) # Đường dẫn: "/api/users"
 async def create_user(new_user: NewUser, user_dal: UserDAL = Depends(get_user_dal)) -> NewUserResponse:
     """Tạo một người dùng mới."""
-    user_id = str(ObjectId())  # Tạo ID mới
     created_user = await user_dal.create_user(
-        id=user_id,
-        no=new_user.no,
         name=new_user.name,
         email=new_user.email,
         password=new_user.password, # Cần xem xét mã hóa mật khẩu ở đây
@@ -55,7 +51,7 @@ async def create_user(new_user: NewUser, user_dal: UserDAL = Depends(get_user_da
     if not created_user:
         raise HTTPException(status_code=500, detail="Không thể tạo người dùng.")
     return NewUserResponse(
-        id=created_user.id, # Lấy id từ user được tạo thành công
+        id=created_user.id,
         name=created_user.name,
     )
 
