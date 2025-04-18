@@ -7,6 +7,7 @@ import {
   ScrollView,
   Alert,
   View,
+  Button,
 } from "react-native";
 import { Audio } from "expo-av";
 import Constants from "expo-constants";
@@ -16,6 +17,7 @@ import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { router } from "expo-router";
 
 // API configuration
 // const API_BASE_URL = `http://${Constants.expoConfig?.extra?.serverIp}:${Constants.expoConfig?.extra?.apiPort}`;
@@ -37,6 +39,19 @@ export default function HomeScreen() {
   const [sensorValues, setSensorValues] = useState<Record<string, string>>({});
   const [userNo, setUserNo] = useState<number | null>(null);
 
+
+  const logOut = async () => {
+    try {
+      await AsyncStorage.multiRemove([
+        "user_no",
+        "user_email",
+        "user_password",
+      ]);
+      router.replace("/login");
+    } catch (e) {
+      console.error("Lỗi khi đăng xuất:", e);
+    }
+  };
   // Lấy user_no từ AsyncStorage
   useEffect(() => {
     const getUserNo = async () => {
@@ -519,9 +534,9 @@ export default function HomeScreen() {
       {/* Server IP Configuration */}
       <ThemedView style={styles.serverConfig}>
         <ThemedText type="subtitle">Server Configuration</ThemedText>
-        {/* <ThemedView style={styles.ipInputContainer}>
+        <ThemedView style={styles.ipInputContainer}>
           <ThemedText>Server IP: {serverIp}</ThemedText>
-        </ThemedView> */}
+        </ThemedView>
         <ThemedText>Connection Status: {connectionStatus}</ThemedText>
       </ThemedView>
 
@@ -601,6 +616,18 @@ export default function HomeScreen() {
             ? "Chế độ tự động: LED sẽ điều chỉnh theo ánh sáng"
             : 'Thử nói: "Bật đèn phòng khách", "Tắt đèn số 1" hoặc "Tắt tất cả đèn"'}
         </ThemedText>
+        <Button
+          title="Danh sách đèn"
+          onPress={() => router.push("/(list)/light")}
+        />
+        <Button
+          title="Danh sách quạt"
+          onPress={() => router.push("/(list)/fan")}
+        />
+        <Button
+          title="Đăng xuất"
+          onPress={logOut}
+        />
       </ThemedView>
     </ParallaxScrollView>
   );
