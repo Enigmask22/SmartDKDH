@@ -20,6 +20,7 @@
     "@react-native-community/slider": "4.5.5",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/native": "^7.0.14",
+    "@reduxjs/toolkit": "^2.6.1",
     "date-fns": "^4.1.0",
     "expo": "~52.0.37",
     "expo-av": "~15.0.2",
@@ -35,6 +36,7 @@
     "expo-system-ui": "~4.0.8",
     "expo-updates": "~0.27.4",
     "expo-web-browser": "~14.0.2",
+    "lottie-react-native": "^7.2.2",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-native": "0.76.7",
@@ -46,6 +48,8 @@
     "react-native-screens": "~4.4.0",
     "react-native-svg": "^15.11.2",
     "react-native-web": "~0.19.13",
+    "react-native-webview": "13.12.5",
+    "react-redux": "^9.2.0",
     "react-native-webview": "13.12.5"
   },
   "devDependencies": {

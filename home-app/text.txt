@@ -1,0 +1,331 @@
+  // function handleVoiceCommand(command: string) {
+  //   const normalizedCommand = command.toLowerCase();
+  //   console.log("Processing command:", normalizedCommand);
+
+  //   // Xác định hành động: bật/tắt/tăng/giảm
+  //   let action = "";
+  //   if (normalizedCommand.includes("tắt")) {
+  //     action = "off";
+  //   } else if (
+  //     normalizedCommand.includes("bật") ||
+  //     normalizedCommand.includes("mở")
+  //   ) {
+  //     action = "on";
+  //   } else if (normalizedCommand.includes("tăng")) {
+  //     action = "increase";
+  //   } else if (normalizedCommand.includes("giảm")) {
+  //     action = "decrease";
+  //   } else {
+  //     // Đặt quạt số $number ở (mức)? number %
+  //     // Kiểm tra xem có yêu cầu đặt mức cụ thể không
+  //     const percentMatch = normalizedCommand.match(/(\d+)(\s*%|\s*phần trăm)/);
+  //     const setLevelMatch = normalizedCommand.match(
+  //       /quạt\s+(số\s+)?(\d+)\s+(?:ở\s+)?mức\s+(\d+)/i
+  //     );
+
+  //     if (percentMatch) {
+  //       const percent = parseInt(percentMatch[1]);
+  //       if (!isNaN(percent) && percent >= 0 && percent <= 100) {
+  //         // Xác định đối tượng: tất cả quạt hoặc quạt cụ thể
+  //         console.log(`Setting fan to ${percent}%`);
+  //         // @ts-ignore
+  //         dispatch(setFanValue({ id: fan.id, value: percent }));
+  //       }
+  //     } else if (setLevelMatch) {
+  //       const fanNumber = parseInt(setLevelMatch[2]);
+  //       const level = parseInt(setLevelMatch[3]);
+
+  //       if (!isNaN(level) && level >= 0 && level <= 100) {
+  //         if (devices.some((device) => device.id === fan?.id)) {
+  //           console.log(`Setting fan ${fanNumber} to ${level}%`);
+  //           // @ts-ignore
+  //           dispatch(handleSetFanValue(fan.id, level));
+  //         } else {
+  //           console.log(`Fan ${fanNumber} not found`);
+  //         }
+  //         return;
+  //       }
+  //     }
+
+  //     console.log("No valid action found in command");
+  //     return;
+  //   }
+
+  //   // Xác định đối tượng: tất cả quạt hoặc quạt cụ thể
+  //   console.log("Controlling fan:", action);
+  //   // @ts-ignore
+  //   dispatch(toggleFan({ id: fan.id, action }));
+  // }
+
+
+
+
+
+  // function handleVoiceCommand(command: string) {
+  //   const normalizedCommand = command.toLowerCase();
+  //   console.log("Processing command:", normalizedCommand);
+
+  //   // Xác định hành động: bật/tắt/tăng/giảm
+  //   let action = "";
+  //   if (normalizedCommand.includes("tắt")) {
+  //     action = "off";
+  //   } else if (
+  //     normalizedCommand.includes("bật") ||
+  //     normalizedCommand.includes("mở")
+  //   ) {
+  //     action = "on";
+  //   } else if (normalizedCommand.includes("tăng")) {
+  //     action = "increase";
+  //   } else if (normalizedCommand.includes("giảm")) {
+  //     action = "decrease";
+  //   } else {
+  //     // Đặt quạt số $number ở (mức)? number %
+  //     // Kiểm tra xem có yêu cầu đặt mức cụ thể không
+  //     const percentMatch = normalizedCommand.match(/(\d+)(\s*%|\s*phần trăm)/);
+  //     const setLevelMatch = normalizedCommand.match(
+  //       /quạt\s+(số\s+)?(\d+)\s+(?:ở\s+)?mức\s+(\d+)/i
+  //     );
+
+  //     if (percentMatch) {
+  //       const percent = parseInt(percentMatch[1]);
+  //       if (!isNaN(percent) && percent >= 0 && percent <= 100) {
+  //         // Xác định đối tượng: tất cả quạt hoặc quạt cụ thể
+  //         if (
+  //           normalizedCommand.includes("tất cả") ||
+  //           normalizedCommand.includes("hết")
+  //         ) {
+  //           console.log(`Setting all fans to ${percent}%`);
+  //           devices.forEach((device) => {
+  //             dispatch(setFanValue({ id: device.id, value: percent }));
+  //           });
+  //           return;
+  //         }
+
+  //         // Tìm số quạt trong câu nói
+  //         const numbers =
+  //           normalizedCommand.match(/quạt\s+(số\s+)?(\d+)/g) || [];
+  //         numbers.forEach((match) => {
+  //           const matchResult = match.match(/\d+/);
+  //           if (matchResult) {
+  //             const num = matchResult[0];
+  //             const deviceId = `dadn-fan-${num}`;
+  //             devices.forEach((device) => {
+  //               if (device.id === deviceId) {
+  //                 console.log(`Setting fan ${num} to ${percent}%`);
+  //                 dispatch(setFanValue({ id: device.id, value: percent }));
+  //               } else {
+  //                 console.log(`Fan ${num} not found`);
+  //               }
+  //             });
+  //           }
+  //         });
+  //         return;
+  //       }
+  //     } else if (setLevelMatch) {
+  //       const fanNumber = parseInt(setLevelMatch[2]);
+  //       const level = parseInt(setLevelMatch[3]);
+
+  //       if (!isNaN(fanNumber) && !isNaN(level) && level >= 0 && level <= 100) {
+  //         const deviceId = `dadn-fan-${fanNumber}`;
+  //         const device = devices.find((device) => device.id === deviceId);
+  //         if (device) {
+  //           console.log(`Setting fan ${fanNumber} to level ${level}`);
+  //           dispatch(setFanValue({ id: device.id, value: level }));
+  //         } else {
+  //           console.log(`Fan ${fanNumber} not found`);
+  //         }
+  //         return;
+  //       }
+  //     }
+
+  //     console.log("No valid action found in command");
+  //     return;
+  //   }
+
+  //   // Xác định đối tượng: tất cả quạt hoặc quạt cụ thể
+  //   if (
+  //     normalizedCommand.includes("tất cả") ||
+  //     normalizedCommand.includes("hết")
+  //   ) {
+  //     console.log("Controlling all fans:", action);
+  //     devices.forEach((device) => {
+  //       dispatch(toggleFan({ id: device.id, action }));
+  //     });
+  //     return;
+  //   }
+
+  //   // Tìm số quạt trong câu nói
+  //   const numbers = normalizedCommand.match(/\d+/g) || [];
+  //   if (numbers.length > 0) {
+  //     numbers.forEach((num) => {
+  //       const deviceId = `dadn-fan-${num}`;
+  //       const device = devices.find((device) => device.id === deviceId);
+  //       if (device) {
+  //         console.log(`Controlling fan ${num}:`, action);
+  //         dispatch(toggleFan({ id: device.id, action }));
+  //       } else {
+  //         console.log(`Fan ${num} not found`);
+  //       }
+  //     });
+  //     return;
+  //   }
+
+  //   // Nếu không tìm thấy số cụ thể, thử điều khiển quạt đầu tiên
+  //   if (devices.length > 0) {
+  //     console.log("Controlling first fan:", action);
+  //     dispatch(toggleFan({ id: devices[0].id, action }));
+  //   }
+  // }
+
+  // const logUserActivity = async (
+  //   activity: string,
+  //   status: string,
+  //   deviceName: string
+  // ) => {
+  //   try {
+  //     // Kiểm tra xem đã có user_no chưa
+  //     if (userNo === null) {
+  //       console.warn("userNo chưa sẵn sàng, không thể gửi log hoạt động");
+  //       return;
+  //     }
+
+  //     const logData = {
+  //       user_no: userNo,
+  //       activity: activity,
+  //       status: status,
+  //       device_name: deviceName,
+  //       timestamp: new Date().toISOString(),
+  //     };
+
+  //     console.log("Sending log data:", logData);
+
+  //     // const response = await fetch(`http://${serverIp}:8000/api/logs`, {
+  //     const response = await fetch(`${API_BASE_URL}/api/logs`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(logData),
+  //     });
+
+  //     // Log response status để debug
+  //     console.log(`Log API response status: ${response.status}`);
+
+  //     // Lấy response body dưới dạng text
+  //     const responseText = await response.text();
+  //     console.log("Response text:", responseText);
+
+  //     // Kiểm tra xem response có phải JSON không
+  //     let result;
+  //     try {
+  //       // Chỉ parse JSON nếu responseText không rỗng
+  //       if (responseText) {
+  //         result = JSON.parse(responseText);
+  //       } else {
+  //         // Nếu response rỗng nhưng status OK
+  //         if (response.ok) {
+  //           console.log("Activity logged successfully (empty response)");
+  //           return;
+  //         } else {
+  //           throw new Error("Empty response with error status");
+  //         }
+  //       }
+  //     } catch (parseError) {
+  //       console.error("Error parsing response:", parseError);
+  //       // Nếu response OK dù không phải JSON
+  //       if (response.ok) {
+  //         console.log("Activity logged successfully (non-JSON response)");
+  //         return;
+  //       } else {
+  //         throw new Error(`Invalid response format: ${responseText}`);
+  //       }
+  //     }
+
+  //     // Xử lý result nếu có
+  //     if (result) {
+  //       if (result.success || response.ok) {
+  //         console.log("Activity logged successfully");
+  //       } else {
+  //         console.error(
+  //           "Failed to log activity:",
+  //           result.message || result.detail || "Unknown error"
+  //         );
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error("Error logging user activity:", error);
+  //   }
+  // };
+
+
+
+
+    const handleVoiceCommand = (command: string) => {
+    console.log("Processing command:", command);
+
+    // Chuẩn hóa chuỗi tiếng Việt
+    const normalizedCommand = command
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+
+    console.log("Normalized command:", normalizedCommand);
+
+    const isOff = normalizedCommand.includes("tat");
+    const isOn = normalizedCommand.includes("bat");
+    console.log("isOff:", isOff);
+    console.log("isOn:", isOn);
+    let status: string;
+    if (isOn) {
+      status = "1";
+    } else if (isOff) {
+      status = "0";
+    } else {
+      // Handle the case when neither condition is true
+      console.log("Command not recognized as on or off");
+      return; // Exit early if we can't determine on/off
+    }
+
+    // Now we can safely use status since it's definitely assigned
+    if (normalizedCommand.includes("het")) {
+      for (const device of devices) {
+        const deviceId = device.id;
+        dispatch(toggleLed({ id: deviceId, newStatus: status }));
+      }
+      return;
+    }
+
+    // Find LED number in the command
+    const numbers = normalizedCommand.match(/\d+/g) || [];
+    if (numbers.length > 0) {
+      numbers.forEach((num) => {
+        const deviceId = `dadn-led-${num}`;
+        dispatch(toggleLed({ id: deviceId, newStatus: status }));
+      });
+      return;
+    }
+
+    // Find room name in the command
+    // normalizedCommand.includes(roomName)
+    for (const device of devices) {
+      const deviceId = device.id;
+      const deviceDescription = device.description.toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+      if (normalizedCommand.includes(deviceDescription)) {
+        const deviceId = findDeviceByDescription(deviceDescription);
+        if (deviceId) {
+          dispatch(toggleLed({ id: deviceId, newStatus: status }));
+          return;
+        }
+      }
+    }
+  };
+
+
+
+  
+  const findDeviceByDescription = (description: string) => {
+    const device = devices.find((d) => d.description.toLowerCase() === description);
+    return device ? device.id : null;
+  };
