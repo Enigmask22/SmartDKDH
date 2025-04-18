@@ -47,8 +47,6 @@ const OnboardingScreen = () => {
   );
 };
 
-export default OnboardingScreen;
-
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: "center", alignItems: "center" },
   container_top: {
@@ -85,3 +83,4 @@ const styles = StyleSheet.create({
     color: "white",
   },
 });
+export default OnboardingScreen;

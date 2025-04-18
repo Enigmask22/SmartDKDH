@@ -39,7 +39,6 @@ export default function HomeScreen() {
   const [sensorValues, setSensorValues] = useState<Record<string, string>>({});
   const [userNo, setUserNo] = useState<number | null>(null);
 
-
   const logOut = async () => {
     try {
       await AsyncStorage.multiRemove([
@@ -624,10 +623,7 @@ export default function HomeScreen() {
           title="Danh sách quạt"
           onPress={() => router.push("/(list)/fan")}
         />
-        <Button
-          title="Đăng xuất"
-          onPress={logOut}
-        />
+        <Button title="Đăng xuất" onPress={logOut} />
       </ThemedView>
     </ParallaxScrollView>
   );

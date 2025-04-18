@@ -1,147 +1,160 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Dimensions } from "react-native";
+
+const { width, height } = Dimensions.get("window");
+
+// Define a base width for scaling calculations (e.g., the width of the design mockup)
+const baseWidth = 375;
+const scale = (size: number) => (width / baseWidth) * size;
+const verticalScale = (size: number) => (height / 667) * size; // Assuming a base height
+const moderateScale = (size: number, factor = 0.5) =>
+  size + (scale(size) - size) * factor;
+
 export const styles = StyleSheet.create({
-    header: {
-        position: "relative",
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center", // Center the header content
-        paddingHorizontal: 16,
-        paddingTop: 15,
-        paddingBottom: 10,
-        width: "100%",
-    },
-    backButton: {
-        position: "absolute",
-        left: 16,
-        top: "50%",
-        transform: [{ translateY: -12 }], // Half of the icon size to center it vertically
-        zIndex: 10, // Ensure it's above other elements
-    },
-    headerContent: {
-        flex: 1,
-        alignItems: "center", // This centers the text horizontally in the remaining space
-    },
-    headerTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-    description: {
-        fontSize: 14,
-        color: "#666",
-        marginTop: 4,
-    },
-    titleContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 8,
-        marginBottom: 16,
-    },
-    serverConfig: {
-        marginBottom: 16,
-        padding: 12,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: "#ccc",
-    },
-    fanControlsContainer: {
-        marginBottom: 16,
-    },
-    fanItem: {
-        flexDirection: "row",
-        alignItems: "center",
-        padding: 12,
-        borderRadius: 8,
-        marginBottom: 8,
-        borderWidth: 1,
-        borderColor: "#ccc",
-    },
-    fanIndicator: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        justifyContent: "center",
-        alignItems: "center",
-        marginRight: 12,
-    },
-    fanOn: {
-        backgroundColor: "#4CAF50",
-    },
-    fanOff: {
-        backgroundColor: "#666",
-    },
-    fanStatusText: {
-        color: "#fff",
-        fontWeight: "bold",
-    },
-    sliderContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginTop: 8,
-    },
-    slider: {
-        flex: 1,
-        height: 40,
-        marginRight: 8,
-    },
-    buttonGroup: {
-        flexDirection: "row",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: 10,
-        marginTop: 8,
-        width: "100%",
-    },
-    controlButton: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        paddingVertical: 6,
-        paddingHorizontal: 12,
-        borderRadius: 4,
-        marginHorizontal: 4,
-        minWidth: 40,
-        alignItems: "center",
-    },
-    buttonText: {
-        color: "#fff",
-    },
-    voiceControlContainer: {
-        alignItems: "center",
-        marginTop: 20,
-        marginBottom: 40,
-    },
-    controlButtonsRow: {
-        flexDirection: "row",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: 20,
-    },
-    micButton: {
-        width: 50,
-        height: 50,
-        borderRadius: 30,
-        borderColor: "#4CAF50",
-        borderWidth: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        marginBottom: 8,
-    },
-    dissabledMicButton: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        borderColor: "#666",
-        borderWidth: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        marginBottom: 8,
-    },
-    listeningButton: {
-        borderColor: "#ff4444",
-        borderWidth: 1,
-    },
-    micButtonText: {
-        fontSize: 24,
-    },
+  header: {
+    position: "relative",
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center", // Center the header content
+    paddingHorizontal: scale(16),
+    paddingTop: verticalScale(15),
+    paddingBottom: verticalScale(10),
+    width: "100%",
+  },
+  backButton: {
+    position: "absolute",
+    left: scale(16),
+    top: "50%", // Keep percentage for vertical centering relative to header height
+    // Adjust translateY based on the actual scaled icon size if needed
+    transform: [{ translateY: -moderateScale(12) }],
+    zIndex: 10, // Ensure it's above other elements
+  },
+  headerContent: {
+    flex: 1,
+    alignItems: "center", // This centers the text horizontally in the remaining space
+  },
+  headerTitle: {
+    fontSize: moderateScale(18),
+    fontWeight: "bold",
+  },
+  description: {
+    fontSize: moderateScale(14),
+    color: "#666",
+    marginTop: verticalScale(4),
+  },
+  titleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: scale(8),
+    marginBottom: verticalScale(16),
+  },
+  serverConfig: {
+    marginBottom: verticalScale(16),
+    padding: moderateScale(12),
+    borderRadius: moderateScale(8),
+    borderWidth: 1, // Keep border width fixed or scale minimally if desired
+    borderColor: "#ccc",
+  },
+  fanControlsContainer: {
+    marginBottom: verticalScale(16),
+  },
+  fanItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: moderateScale(12),
+    borderRadius: moderateScale(8),
+    marginBottom: verticalScale(8),
+    borderWidth: 1, // Keep border width fixed
+    borderColor: "#ccc",
+  },
+  fanIndicator: {
+    width: scale(50),
+    height: scale(50), // Keep aspect ratio square
+    borderRadius: scale(25), // Half of width/height
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: scale(12),
+  },
+  fanOn: {
+    backgroundColor: "#4CAF50",
+  },
+  fanOff: {
+    backgroundColor: "#666",
+  },
+  fanStatusText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: moderateScale(12), // Scale status text if needed
+  },
+  sliderContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: verticalScale(8),
+  },
+  slider: {
+    flex: 1,
+    height: verticalScale(40),
+    marginRight: scale(8),
+  },
+  buttonGroup: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: scale(10),
+    marginTop: verticalScale(8),
+    width: "100%",
+  },
+  controlButton: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 }, // Shadow offset might not need scaling
+    shadowOpacity: 0.25,
+    paddingVertical: verticalScale(6),
+    paddingHorizontal: scale(12),
+    borderRadius: moderateScale(4),
+    marginHorizontal: scale(4),
+    minWidth: scale(40),
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: moderateScale(14), // Scale button text
+  },
+  voiceControlContainer: {
+    alignItems: "center",
+    marginTop: verticalScale(20),
+    marginBottom: verticalScale(40),
+  },
+  controlButtonsRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: scale(20),
+  },
+  micButton: {
+    width: scale(50),
+    height: scale(50), // Keep aspect ratio
+    borderRadius: scale(25), // Half of width/height
+    borderColor: "#4CAF50",
+    borderWidth: 1, // Keep border width fixed
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: verticalScale(8),
+  },
+  dissabledMicButton: {
+    width: scale(60), // Scale disabled button size
+    height: scale(60),
+    borderRadius: scale(30),
+    borderColor: "#666",
+    borderWidth: 1, // Keep border width fixed
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: verticalScale(8),
+  },
+  listeningButton: {
+    borderColor: "#ff4444",
+    borderWidth: 1, // Keep border width fixed
+  },
+  micButtonText: {
+    fontSize: moderateScale(24),
+  },
 });
