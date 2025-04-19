@@ -11,7 +11,7 @@ type Props = {
     availFan: number,
 }
 export function Devices(props : Props) {
-    const Device = [['led', props.availLed, props.runningLed], ['fan', props.availFan, props.runningFan]]
+    const Device = [['light', props.availLed, props.runningLed], ['fan', props.availFan, props.runningFan]]
     return(
         <View style={styles.container}>
             <View style={styles.title}>
