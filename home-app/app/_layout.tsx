@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useFonts } from "expo-font";
 import { Stack, useRouter, SplashScreen } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -16,6 +17,18 @@ import { Provider } from "react-redux";
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const [loaded, error] = useFonts({
+    "Poppins-Bold": require("../assets/fonts/Poppins-Bold.ttf"),
+    "Poppins-Regular": require("../assets/fonts/Poppins-Regular.ttf"),
+    "Poppins-Light": require("../assets/fonts/Poppins-Light.ttf"),
+    "Poppins-SemiBold": require("../assets/fonts/Poppins-SemiBold.ttf"),
+    "Inter-Light": require("../assets/fonts/Inter-Light-BETA.otf"),
+    "Inter-ExtraBold": require("../assets/fonts/Inter-ExtraBold.otf"),
+    "Quicksand-Regular": require("../assets/fonts/Quicksand-Regular.ttf"),
+    "Quicksand-Semibold": require("../assets/fonts/Quicksand-SemiBold.ttf"),
+    "Quicksand-Bold": require("../assets/fonts/Quicksand-Bold.ttf"),
+    "Rubik-Regular": require("../assets/fonts/Rubik-Regular.ttf"),
+  });
   const [isReady, setIsReady] = useState(false); // Trạng thái sẵn sàng của app
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null); // Trạng thái đăng nhập (null: đang kiểm tra)
   const [isConnecting, setIsConnecting] = useState(false); // Trạng thái đang kết nối với Adafruit
@@ -113,23 +126,22 @@ export default function RootLayout() {
   }, []); // Chạy 1 lần khi layout mount
 
   useEffect(() => {
-    if (isReady && !isConnecting) {
-      // Khi đã sẵn sàng và không đang kết nối, ẩn splash screen
+    if (loaded && isReady && !isConnecting) {
       SplashScreen.hideAsync();
-
-      // Điều hướng dựa trên trạng thái đăng nhập
+  
       if (isLoggedIn === true) {
-        // Đảm bảo người dùng đang ở màn hình tabs nếu họ đã đăng nhập
-        // Dùng replace để không quay lại được màn hình loading/login
         router.replace("/(tabs)");
       } else if (isLoggedIn === false) {
+
+        router.replace("/login");
+
         // Đảm bảo người dùng đang ở màn hình login nếu họ chưa đăng nhập
         // @type-ignore
         router.push("/onboarding"); // Hoặc "/login" nếu bạn muốn
+
       }
-      // Nếu isLoggedIn là null, không làm gì cả, đợi useEffect tiếp theo
     }
-  }, [isReady, isLoggedIn, isConnecting, router]); // Chạy lại khi isReady, isLoggedIn hoặc isConnecting thay đổi
+  }, [loaded, isReady, isConnecting, isLoggedIn, router]); // Chạy lại khi isReady, isLoggedIn hoặc isConnecting thay đổi
 
   if (!isReady || isConnecting) {
     // Hiển thị màn hình loading khi đang kiểm tra AsyncStorage hoặc đang kết nối Adafruit
@@ -138,6 +150,10 @@ export default function RootLayout() {
         <ActivityIndicator size="large" />
       </View>
     );
+  }
+
+  if (!loaded && !error) {
+    return null;
   }
 
   // Sử dụng Stack layout gốc
