@@ -1,0 +1,5 @@
+keras
+tensorflow==2.10.0
+Pillow
+numpy
+opencv-python

@@ -2,8 +2,16 @@ import React, { useState, useEffect } from "react";
 import { useFonts } from "expo-font";
 import { Stack, useRouter, SplashScreen } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ActivityIndicator, View, StyleSheet, Alert } from "react-native";
-import Constants from "expo-constants"; // Thêm để lấy cấu hình URL
+import {
+  ActivityIndicator,
+  View,
+  StyleSheet,
+  Alert,
+  ImageBackground,
+} from "react-native";
+
+import { store } from "@/store";
+import { Provider } from "react-redux";
 
 // Ngăn không cho splash screen tự động ẩn đi
 SplashScreen.preventAutoHideAsync();
@@ -124,7 +132,13 @@ export default function RootLayout() {
       if (isLoggedIn === true) {
         router.replace("/(tabs)");
       } else if (isLoggedIn === false) {
+
         router.replace("/login");
+
+        // Đảm bảo người dùng đang ở màn hình login nếu họ chưa đăng nhập
+        // @type-ignore
+        router.push("/onboarding"); // Hoặc "/login" nếu bạn muốn
+
       }
     }
   }, [loaded, isReady, isConnecting, isLoggedIn, router]); // Chạy lại khi isReady, isLoggedIn hoặc isConnecting thay đổi
@@ -146,15 +160,20 @@ export default function RootLayout() {
   // Expo Router sẽ tự động quản lý việc hiển thị screen nào dựa trên URL/state
   // và điều hướng chúng ta thực hiện ở trên.
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      {/*
-        Screen cho login và tabs sẽ được định nghĩa trong thư mục app
-        và được Expo Router tự động xử lý dựa trên điều hướng.
-        Chúng ta không cần khai báo trực tiếp ở đây nếu dùng file-based routing.
-      */}
-      <Stack.Screen name="login" />
-      <Stack.Screen name="(tabs)" />
-    </Stack>
+    <Provider store={store}>
+      <Stack screenOptions={{ headerShown: false }}>
+        {/*
+          Screen cho login và tabs sẽ được định nghĩa trong thư mục app
+          và được Expo Router tự động xử lý dựa trên điều hướng.
+          Chúng ta không cần khai báo trực tiếp ở đây nếu dùng file-based routing.
+        */}
+        <Stack.Screen name="onboarding" />
+        <Stack.Screen name="login" />
+        <Stack.Screen name="register" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="(list)" />
+      </Stack>
+    </Provider>
   );
 }
 
