@@ -1,19 +1,32 @@
-import { View, Text, TouchableOpacity, ScrollView, Switch, Alert, Platform } from "react-native";
-import { Ionicons } from '@expo/vector-icons';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Switch,
+  Alert,
+  Platform,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { router } from "expo-router";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchFanDevices, setAllValues, setFanValue, toggleAutoMode } from "@/store/fanDevicesSlice";
+import {
+  fetchFanDevices,
+  setAllValues,
+  setFanValue,
+  toggleAutoMode,
+} from "@/store/fanDevicesSlice";
 import { setSensorValues } from "@/store/sensorSlice";
 import { AppDispatch, RootState } from "@/store";
-import DeviceCard from "@/components/card";
+import DeviceCard from "@/components/card/index";
 import SummaryCard from "@/components/card/Summary";
 import { Audio } from "expo-av";
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from "@expo/vector-icons";
 import { handleForAll } from "@/actions/fan/handleVoiceCommand";
 import { styles } from "@/styles/fan";
 import { VoiceHint } from "@/components/ui/VoiceHint";
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
 const API_BASE_URL = `https://smartdkdh.onrender.com`;
 
@@ -26,8 +39,10 @@ export default function FanList() {
   );
   const sensor = useSelector((state: RootState) => state.sensor);
   const autoMode = useSelector((state: RootState) => state.fanDevices.autoMode);
-  const { devices, loading, error } = useSelector((state: RootState) => state.fanDevices);
-  const onFans = devices.filter(fan => fan.value !== 0).length;
+  const { devices, loading, error } = useSelector(
+    (state: RootState) => state.fanDevices
+  );
+  const onFans = devices.filter((fan) => fan.value !== 0).length;
   const offFans = devices.length - onFans;
 
   const dispatch = useDispatch<AppDispatch>();
@@ -252,26 +267,36 @@ export default function FanList() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Smart Fan</Text>
       </View>
       <SummaryCard
         total={devices.length}
-        on={onFans} off={offFans} type="fan"
+        on={onFans}
+        off={offFans}
+        type="fan"
       />
       <View style={styles.fansGrid}>
-        {devices.map(fan => (
+        {devices.map((fan) => (
           <DeviceCard
             key={fan.id}
             device={{
-              type: 'fan',
-              ...fan
+              type: "fan",
+              ...fan,
             }}
           >
             <TouchableOpacity>
-              <Ionicons name="settings-outline" size={20} color="#777" onPress={() => router.push(`/(list)/fanDetails?id=${fan.id}`)} />
+              <Ionicons
+                name="settings-outline"
+                size={20}
+                color="#777"
+                onPress={() => router.push(`/(list)/fanDetails?id=${fan.id}`)}
+              />
             </TouchableOpacity>
           </DeviceCard>
         ))}
@@ -285,26 +310,34 @@ export default function FanList() {
           onPress={recording ? stopRecording : startRecording}
           disabled={autoMode}
         >
-          {
-            autoMode ? (
-              <FontAwesome6 name="superpowers" size={24} color="#4CAF50" />
-            ) : (
-              <MaterialIcons name="keyboard-voice" size={24} color={isListening ? "#ff4444" : "#4CAF50"} />
-            )
-          }
+          {autoMode ? (
+            <FontAwesome6 name="superpowers" size={24} color="#4CAF50" />
+          ) : (
+            <MaterialIcons
+              name="keyboard-voice"
+              size={24}
+              color={isListening ? "#ff4444" : "#4CAF50"}
+            />
+          )}
         </TouchableOpacity>
-        <View style={{
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}>
-          <Text style={{
-            fontSize: 16,
-            fontWeight: 'bold',
-            textAlign: 'center',
-          }}>Auto Mode</Text>
+        <View
+          style={{
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 16,
+              fontWeight: "bold",
+              textAlign: "center",
+            }}
+          >
+            Auto Mode
+          </Text>
           <Switch
-            trackColor={{ false: '#e0e0e0', true: '#3b82f6' }}
-            thumbColor={'#ffffff'}
+            trackColor={{ false: "#e0e0e0", true: "#3b82f6" }}
+            thumbColor={"#ffffff"}
             // @ts-ignore
             onValueChange={() => dispatch(toggleAutoMode())}
             value={autoMode}

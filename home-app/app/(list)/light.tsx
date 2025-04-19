@@ -1,22 +1,35 @@
-import { View, Text, TouchableOpacity, Switch, ScrollView, Alert, Platform } from "react-native";
-import { Ionicons } from '@expo/vector-icons';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Switch,
+  ScrollView,
+  Alert,
+  Platform,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { router } from "expo-router";
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState, AppDispatch } from '@/store';
-import { fetchLedDevices, setAllStatuses, toggleLed, toggleAutoMode } from '@/store/ledDevicesSlice';
-import { useEffect } from 'react';
-import DeviceCard from "@/components/card";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "@/store";
+import {
+  fetchLedDevices,
+  setAllStatuses,
+  toggleLed,
+  toggleAutoMode,
+} from "@/store/ledDevicesSlice";
+import { useEffect } from "react";
+import DeviceCard from "@/components/card/index";
 import SummaryCard from "@/components/card/Summary";
 import { setSensorValues } from "@/store/sensorSlice";
 import { Audio } from "expo-av";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { VoiceHint } from "@/components/ui/VoiceHint";
 import { styles } from "@/styles/light";
 import { handleForAll } from "@/actions/light/handleVoiceCommand";
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
-const API_BASE_URL = 'https://smartdkdh.onrender.com';
+const API_BASE_URL = "https://smartdkdh.onrender.com";
 
 export default function LightList() {
   // khởi tạo state cho các hành động cần thiết
@@ -30,9 +43,11 @@ export default function LightList() {
   // Lấy dữ liệu từ Redux store
   const dispatch = useDispatch<AppDispatch>();
   const autoMode = useSelector((state: RootState) => state.ledDevices.autoMode);
-  const { devices, loading, error } = useSelector((state: RootState) => state.ledDevices);
+  const { devices, loading, error } = useSelector(
+    (state: RootState) => state.ledDevices
+  );
   const sensor = useSelector((state: RootState) => state.sensor);
-  const onBulbs = devices.filter(bulb => bulb.status === "1").length;
+  const onBulbs = devices.filter((bulb) => bulb.status === "1").length;
   const offBulbs = devices.length - onBulbs;
 
   useEffect(() => {
@@ -119,7 +134,7 @@ export default function LightList() {
   }, [autoMode, sensor, devices]);
 
   const toggleSwitch = (id: string) => {
-    const device = devices.find(b => b.id === id);
+    const device = devices.find((b) => b.id === id);
     if (!device) return;
     const newStatus = device.status === "1" ? "0" : "1";
     dispatch(toggleLed({ id, newStatus }));
@@ -266,21 +281,32 @@ export default function LightList() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Smart Light</Text>
       </View>
-      <SummaryCard type="bulb" total={devices.length} on={onBulbs} off={offBulbs} />
+      <SummaryCard
+        type="bulb"
+        total={devices.length}
+        on={onBulbs}
+        off={offBulbs}
+      />
       <View style={styles.bulbsGrid}>
-        {devices.map(bulb => (
-          <DeviceCard key={bulb.id} device={{
-            ...bulb,
-            type: 'bulb',
-          }}>
+        {devices.map((bulb) => (
+          <DeviceCard
+            key={bulb.id}
+            device={{
+              ...bulb,
+              type: "bulb",
+            }}
+          >
             <Switch
-              trackColor={{ false: '#e0e0e0', true: '#3b82f6' }}
-              thumbColor={'#ffffff'}
+              trackColor={{ false: "#e0e0e0", true: "#3b82f6" }}
+              thumbColor={"#ffffff"}
               onValueChange={() => toggleSwitch(bulb.id)}
               value={bulb.status === "1"}
             />
@@ -296,26 +322,34 @@ export default function LightList() {
           onPress={recording ? stopRecording : startRecording}
           disabled={autoMode}
         >
-          {
-            autoMode ? (
-              <FontAwesome6 name="superpowers" size={24} color="#4CAF50" />
-            ) : (
-              <MaterialIcons name="keyboard-voice" size={24} color={isListening ? "#ff4444" : "#4CAF50"} />
-            )
-          }
+          {autoMode ? (
+            <FontAwesome6 name="superpowers" size={24} color="#4CAF50" />
+          ) : (
+            <MaterialIcons
+              name="keyboard-voice"
+              size={24}
+              color={isListening ? "#ff4444" : "#4CAF50"}
+            />
+          )}
         </TouchableOpacity>
-        <View style={{
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}>
-          <Text style={{
-            fontSize: 16,
-            fontWeight: 'bold',
-            textAlign: 'center',
-          }}>Auto Mode</Text>
+        <View
+          style={{
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 16,
+              fontWeight: "bold",
+              textAlign: "center",
+            }}
+          >
+            Auto Mode
+          </Text>
           <Switch
-            trackColor={{ false: '#e0e0e0', true: '#3b82f6' }}
-            thumbColor={'#ffffff'}
+            trackColor={{ false: "#e0e0e0", true: "#3b82f6" }}
+            thumbColor={"#ffffff"}
             // @ts-ignore
             onValueChange={() => dispatch(toggleAutoMode())}
             value={autoMode}
