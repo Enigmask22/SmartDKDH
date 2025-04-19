@@ -27,7 +27,6 @@ import { Devices } from "@/components/Devices";
 
 import { router } from "expo-router";
 
-
 const { width, height } = Dimensions.get("window");
 // API configuration
 // const API_BASE_URL = `http://${Constants.expoConfig?.extra?.serverIp}:${Constants.expoConfig?.extra?.apiPort}`;
@@ -84,10 +83,10 @@ export default function HomeScreen() {
     fetchLeds();
   }, [serverIp]);
 
-    // Fetch LED devices
-    useEffect(() => {
-      fetchFans();
-    }, [serverIp]);
+  // Fetch LED devices
+  useEffect(() => {
+    fetchFans();
+  }, [serverIp]);
 
   // WebSocket connection
   useEffect(() => {
@@ -161,39 +160,39 @@ export default function HomeScreen() {
   };
 
   const fetchFans = async () => {
-      try {
-        // const response = await fetch(`http://${serverIp}:8000/fan-devices`);
-        const response = await fetch(`${API_BASE_URL}/fan-devices`);
-        const data = await response.json();
-        const devices = data.devices;
-  
-        setFanDevices(devices.map((d: { id: string }) => d.id));
-  
-        // Save descriptions and values for each device
-        const descriptions: Record<string, string> = {};
-        const initialValues: Record<string, number> = {};
-        devices.forEach(
-          (device: { id: string; description: string; value: number }) => {
-            descriptions[device.id] = device.description;
-            initialValues[device.id] = device.value;
-          }
-        );
-  
-        setDeviceDescriptions(descriptions);
-        setFanValues(initialValues);
-      } catch (error) {
-        console.error("Error fetching Fan devices:", error);
-        Alert.alert(
-          "Error",
-          "Could not connect to the server. Please check your connection."
-        );
-      }
-    };
+    try {
+      // const response = await fetch(`http://${serverIp}:8000/fan-devices`);
+      const response = await fetch(`${API_BASE_URL}/fan-devices`);
+      const data = await response.json();
+      const devices = data.devices;
+
+      setFanDevices(devices.map((d: { id: string }) => d.id));
+
+      // Save descriptions and values for each device
+      const descriptions: Record<string, string> = {};
+      const initialValues: Record<string, number> = {};
+      devices.forEach(
+        (device: { id: string; description: string; value: number }) => {
+          descriptions[device.id] = device.description;
+          initialValues[device.id] = device.value;
+        }
+      );
+
+      setDeviceDescriptions(descriptions);
+      setFanValues(initialValues);
+    } catch (error) {
+      console.error("Error fetching Fan devices:", error);
+      Alert.alert(
+        "Error",
+        "Could not connect to the server. Please check your connection."
+      );
+    }
+  };
 
   const getRunningDeviceNumber = () => {
     let running = 0;
     return getRunningFanNumber() + getRunningLedNumber();
-  }
+  };
 
   const getRunningLedNumber = () => {
     let running = 0;
@@ -201,7 +200,7 @@ export default function HomeScreen() {
       if (ledStatuses[key] != "0") running++;
     }
     return running;
-  }
+  };
 
   const getRunningFanNumber = () => {
     let running = 0;
@@ -209,139 +208,40 @@ export default function HomeScreen() {
       if (fanStatuses[key] != "0") running++;
     }
     return running;
-  }
+  };
 
   return (
-
-    <View style={{backgroundColor:'#f2f6fc', height: height, alignItems:'center'}}>
+    <View
+      style={{
+        backgroundColor: "#f2f6fc",
+        height: height,
+        alignItems: "center",
+      }}
+    >
       <View style={styles.titleContainer}>
         <View style={styles.title}>
-          <Feather name="home" size={30} color='black' />
-          <Text style={{fontSize:25, fontFamily:'Poppins-SemiBold'}}> Home</Text>
+          <Feather name="home" size={30} color="black" />
+          <Text style={{ fontSize: 25, fontFamily: "Poppins-SemiBold" }}>
+            {" "}
+            Home
+          </Text>
         </View>
       </View>
-      <Info device={getRunningDeviceNumber()} online={userNo != null}/>
-      <Sensor/>
-      <Devices runningFan={getRunningFanNumber()} availFan={fanDevices.length} runningLed={getRunningLedNumber()} availLed={ledDevices.length}/>
+      <Info device={getRunningDeviceNumber()} online={userNo != null} />
+      <Sensor />
+      <Devices
+        runningFan={getRunningFanNumber()}
+        availFan={fanDevices.length}
+        runningLed={getRunningLedNumber()}
+        availLed={ledDevices.length}
+      />
     </View>
-
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
-      headerImage={
-        <Image
-          source={require("@/assets/images/partial-react-logo.png")}
-          style={styles.reactLogo}
-        />
-      }
-    >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">LED Control Panel</ThemedText>
-        <HelloWave />
-      </ThemedView>
-
-      {/* Server IP Configuration */}
-      <ThemedView style={styles.serverConfig}>
-        <ThemedText type="subtitle">Server Configuration</ThemedText>
-        <ThemedView style={styles.ipInputContainer}>
-          <ThemedText>Server IP: {serverIp}</ThemedText>
-        </ThemedView>
-        <ThemedText>Connection Status: {connectionStatus}</ThemedText>
-      </ThemedView>
-
-      {/* LED Controls */}
-      <ThemedView style={styles.ledControlsContainer}>
-        {ledDevices.length > 0 ? (
-          ledDevices.map((deviceId) => (
-            <ThemedView key={deviceId} style={styles.ledItem}>
-              <ThemedView
-                style={[
-                  styles.ledIndicator,
-                  ledStatuses[deviceId] === "1" ? styles.ledOn : styles.ledOff,
-                ]}
-              >
-                <ThemedText style={styles.ledStatusText}>
-                  {ledStatuses[deviceId] === "1" ? "ON" : "OFF"}
-                </ThemedText>
-              </ThemedView>
-              <ThemedView style={styles.ledInfo}>
-                <ThemedText type="defaultSemiBold">
-                  LED {getDeviceNumber(deviceId)} -{" "}
-                  {deviceDescriptions[deviceId]}
-                </ThemedText>
-                <ThemedText>
-                  Status:{" "}
-                  {ledStatuses[deviceId] === "1" ? "Turned On" : "Turned Off"}
-                </ThemedText>
-              </ThemedView>
-              <TouchableOpacity
-                style={[
-                  styles.toggleButton,
-                  autoMode ? styles.disabledButton : null,
-                ]}
-                onPress={() =>
-                  toggleLED(deviceId, ledStatuses[deviceId] === "1" ? "0" : "1")
-                }
-                disabled={autoMode}
-              >
-                <ThemedText style={styles.buttonText}>
-                  Turn {ledStatuses[deviceId] === "1" ? "OFF" : "ON"}
-                </ThemedText>
-              </TouchableOpacity>
-            </ThemedView>
-          ))
-        ) : (
-          <ThemedText>No LED devices found. Check your connection.</ThemedText>
-        )}
-      </ThemedView>
-
-      {/* Voice Control */}
-      <ThemedView style={styles.voiceControlContainer}>
-        <View style={styles.controlButtonsRow}>
-          <TouchableOpacity
-            style={[
-              styles.micButton,
-              isListening ? styles.listeningButton : null,
-            ]}
-            onPress={recording ? stopRecording : startRecording}
-            disabled={autoMode}
-          >
-            <ThemedText style={styles.micButtonText}>🎤</ThemedText>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.autoButton,
-              autoMode ? styles.autoButtonActive : null,
-            ]}
-            onPress={() => setAutoMode(!autoMode)}
-          >
-            <ThemedText style={styles.autoButtonText}>🤖</ThemedText>
-          </TouchableOpacity>
-        </View>
-
-        <ThemedText style={styles.voiceHint}>
-          {autoMode
-            ? "Chế độ tự động: LED sẽ điều chỉnh theo ánh sáng"
-            : 'Thử nói: "Bật đèn phòng khách", "Tắt đèn số 1" hoặc "Tắt tất cả đèn"'}
-        </ThemedText>
-        <Button
-          title="Danh sách đèn"
-          onPress={() => router.push("/(list)/light")}
-        />
-        <Button
-          title="Danh sách quạt"
-          onPress={() => router.push("/(list)/fan")}
-        />
-        <Button title="Đăng xuất" onPress={logOut} />
-      </ThemedView>
-    </ParallaxScrollView>
-
   );
 }
 
 const styles = StyleSheet.create({
   titleContainer: {
-    backgroundColor: '#f2f6fc',
+    backgroundColor: "#f2f6fc",
     height: height * 0.12,
     flexDirection: "column",
     paddingTop: 30,
@@ -350,11 +250,11 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   title: {
-    flexDirection: 'row'
+    flexDirection: "row",
   },
   titleBox: {
     flexDirection: "row",
-    gap: width / 1.5
+    gap: width / 1.5,
   },
   serverConfig: {
     marginBottom: 16,
