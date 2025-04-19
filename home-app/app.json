@@ -25,6 +25,9 @@
     "plugins": [
       "expo-router",
       [
+        "expo-font"
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",

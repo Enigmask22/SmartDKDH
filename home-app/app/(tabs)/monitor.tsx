@@ -60,7 +60,7 @@ export default function MonitorScreen() {
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        console.log("Received sensor data:", data);
+        //console.log("Received sensor data:", data);
         if (data.sensor_values) {
           setSensorValues(data.sensor_values);
 
@@ -157,17 +157,7 @@ export default function MonitorScreen() {
   };
 
   return (
-    <ParallaxScrollView
-      headerImage={
-        <IconSymbol
-          name="chart.line.uptrend.xyaxis"
-          size={200}
-          style={styles.headerImage}
-          color={colorScheme === "dark" ? "#ffffff" : "#000000"}
-        />
-      }
-      headerBackgroundColor={{ dark: "#1c1c1c", light: "#f8f8f8" }}
-    >
+    <ScrollView>
       <ThemedView style={styles.container}>
         <ThemedView style={styles.titleContainer}>
           <IconSymbol
@@ -296,7 +286,7 @@ export default function MonitorScreen() {
           </ThemedView>
         ))}
       </ThemedView>
-    </ParallaxScrollView>
+    </ScrollView>
   );
 }
 
