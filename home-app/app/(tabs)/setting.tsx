@@ -7,7 +7,9 @@ import {
   ScrollView,
   Alert,
   View,
-  Dimensions
+  Dimensions,
+  Pressable,
+  StatusBar
 } from "react-native";
 import { Audio } from "expo-av";
 import Constants from "expo-constants";
@@ -22,7 +24,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const { width, height } = Dimensions.get("window");
 import Feather from '@expo/vector-icons/Feather';
 import { SettingOption } from "@/components/SettingOption";
-import { RelativePathString } from "expo-router";
+import { RelativePathString, useRouter } from "expo-router";
 import Octicons from '@expo/vector-icons/Octicons';
 
 // API configuration
@@ -36,6 +38,9 @@ export default function SettingScreen() {
     API_BASE_URL.replace("http://", "").replace(":8000", "")
   );
   const [userNo, setUserNo] = useState<number | null>(null);
+  const router = useRouter(); 
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Lấy user_no từ AsyncStorage
   useEffect(() => {
@@ -56,34 +61,53 @@ export default function SettingScreen() {
     getUserNo();
   }, []);
 
-  useEffect(() => {
-    async function fetchUserData(userId: number | null = userNo): Promise<Record<string, string>> {
-    if (userId == null) throw new Error(`User id is null`);
+  const handleLogout = async () => {
+    //setIsLoading(true);
+    setError(null);
+
     try {
-      const response = await fetch(`https://smartdkdh.onrender.com/api/users/${userId}`);
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch user data: ${response.status} ${response.statusText}`);
-      }
-      
-      const data: Record<string, string> = await response.json();
-      setUserData(data)
-      console.log(data)
-      return userData;
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      throw error;
+      await AsyncStorage.multiRemove([
+        "user_no",
+        "user_email",
+        "user_password",
+        "user_ada",
+        "user_key"
+      ]);
+
+      router.replace("/login"); // Điều hướng đến layout tabs
+    } catch (err: any) {
+      console.error("Lỗi đăng xuất:", err);
+      setError(err.message || "Đã xảy ra lỗi. Vui lòng thử lại.");
+      // Hiển thị thông báo lỗi cụ thể hơn cho người dùng
+      Alert.alert(
+        "Đăng xuất thất bại",
+        err.message || "Đã xảy ra lỗi. Vui lòng thử lại."
+      );
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  useEffect(() => {
+    async function fetchUserData() {
+      let name = await AsyncStorage.getItem("user_name");
+      let email = await AsyncStorage.getItem("user_email");
+      setUserData(
+        {name: name != null ? name : "",
+         email: email != null ? email : ""
+      })
   }
 
   fetchUserData()
-  }, [userNo]);
+  }, []);
 
   const AccountOption = [{name: 'Edit Profile', link:'/profile', button:false}, {name: 'Change Password', link:'/', button:false}, 
                   {name: 'Push Notification', link: null, button:true}]
   const OtherOption = [{name: 'About us', link:'/', button:false}, {name: 'Privacy Policy', link:'/', button:false},
                         {name: 'Terms and condition', link:'/', button:false}]
   return (
+    <>
+    <StatusBar backgroundColor={'#ffffff'} />
     <View style={{backgroundColor:'#f2f6fc', height: height}}>
       <View style={styles.titleContainer}>
         <View style={styles.title}>
@@ -93,7 +117,9 @@ export default function SettingScreen() {
         <View style={styles.titleBox}>
             <AvatarInfo name={userData.name} email = {userData.email}/>
             {/*Tao mot cai ham logout o day*/}
-            <Feather name="log-out" size={40} color="#2666de" />
+            <Pressable onPress={handleLogout}>
+              <Feather name="log-out" size={40} color="#2666de" />
+            </Pressable>
         </View>
       </View>
       <View
@@ -110,6 +136,7 @@ export default function SettingScreen() {
         </ThemedView>
       </ScrollView>
     </View>
+    </>
   );
 }
 

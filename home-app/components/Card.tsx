@@ -34,7 +34,7 @@ export default function DeviceCard({ avail, on, type }: SummaryCardProps) {
         </View>
         <View style={styles.online}>
           <Text style={{ color: "#2666de", bottom: 2, fontWeight: 500 }}>
-            2
+            {on}
           </Text>
         </View>
       </View>

@@ -270,7 +270,7 @@ export default function FanDetails() {
     return <FanNotFound />
   }
   return (
-    <View>
+    <View style={{padding:30, backgroundColor:'#f2f6fc'}}>
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
