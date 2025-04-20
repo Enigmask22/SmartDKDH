@@ -43,6 +43,7 @@ const styles = StyleSheet.create({
   normalText: {
     color: "black",
     fontSize: 15,
+    fontFamily:'Poppins-Regular'
   },
   boxSpacing: {
     marginBottom: height * 0.009,

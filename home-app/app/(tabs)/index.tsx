@@ -9,6 +9,7 @@ import {
   Alert,
   View,
   Button,
+  StatusBar,
 } from "react-native";
 import { Audio } from "expo-av";
 import Constants from "expo-constants";
@@ -211,6 +212,8 @@ export default function HomeScreen() {
   };
 
   return (
+    <>
+    <StatusBar backgroundColor={'#f2f6fc'} />
     <View
       style={{
         backgroundColor: "#f2f6fc",
@@ -236,6 +239,7 @@ export default function HomeScreen() {
         availLed={ledDevices.length}
       />
     </View>
+    </>
   );
 }
 

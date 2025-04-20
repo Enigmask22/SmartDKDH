@@ -20,7 +20,7 @@ const InputPasswordBox = ({
   password: string;
   setPassword: (name: string) => void;
 }) => {
-  const [showPassword, setShowPassword] = useState(false); // State to manage password visibility
+  const [showPassword, setShowPassword] = useState(true); // State to manage password visibility
 
   function handlePasswordVisibility() {
     setShowPassword((prev) => !prev); // Toggle password visibility
@@ -44,10 +44,11 @@ const InputPasswordBox = ({
         <TouchableOpacity onPress={handlePasswordVisibility}>
           <View style={styles.hidePassword}>
             <Ionicons
-              name={showPassword ? "eye-off-outline" : "eye-outline"}
+              name={showPassword ? "eye-off" : "eye"}
               size={15}
+              color={'gray'}
             />
-            <Text style={styles.normalText}> Hide</Text>
+            <Text style={styles.normalText}> {showPassword ? "Show" : "  Hide"}</Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -72,6 +73,7 @@ const styles = StyleSheet.create({
   normalText: {
     color: "black",
     fontSize: 15,
+    fontFamily:'Poppins-Regular'
   },
   boxSpacing: {
     marginBottom: height * 0.009,

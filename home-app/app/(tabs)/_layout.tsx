@@ -33,7 +33,6 @@ export default function TabLayout() {
   }, []);
   return (
     <>
-    <StatusBar backgroundColor={colors.background} />
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: colors.tint,
@@ -56,7 +55,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="monitor"
         options={{
-          title: "Manual",
+          title: "Explore",
           tabBarIcon: ({ color}) => (
             <Feather name="book-open" size={24} color={color} />
           ),

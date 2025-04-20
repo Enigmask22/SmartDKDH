@@ -26,7 +26,7 @@ import InputUserNameBox from "@/components/InputUserNameBox";
 import InputPasswordBox from "@/components/InputPasswordBox";
 import ButtonAuth from "@/components/ButtonAuth";
 import ButtonLoginGoogle from "@/components/ButtonLoginGoogle";
-const { width, height } = Dimensions.get("window"); // L
+const { width, height } = Dimensions.get("window"); 
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
@@ -39,6 +39,24 @@ const LoginScreen = () => {
   // const backendUrl = `http://${Constants.expoConfig?.extra?.serverIp}:${Constants.expoConfig?.extra?.apiPort}`;
   const backendUrl = `https://smartdkdh.onrender.com`;
   const loginApiUrl = `${backendUrl}/init-adafruit-connection`;
+  
+  async function fetchUserData(userId: number): Promise<Record<string, string>> {
+    if (userId == null) throw new Error(`User id is null`);
+    try {
+      const response = await fetch(`https://smartdkdh.onrender.com/api/users/${userId}`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user data: ${response.status} ${response.statusText}`);
+      }
+      
+      const data: Record<string, string> = await response.json();
+      console.log(data)
+      return data;
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      throw error;
+    }
+  }
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -69,8 +87,16 @@ const LoginScreen = () => {
       // Đăng nhập thành công
       if (responseData.success && responseData.user_no !== undefined) {
         const userNo = responseData.user_no;
+        const userData = await fetchUserData(userNo);
+        console.log(userData);
+        if (userData == undefined) {
+          throw new Error("Phản hồi không hợp lệ từ server.");
+        }
         // Lưu user_no, email và password vào AsyncStorage
         await AsyncStorage.setItem("user_no", JSON.stringify(userNo));
+        await AsyncStorage.setItem("user_name", userData.name);
+        await AsyncStorage.setItem("user_ada", userData.username_adafruit);
+        await AsyncStorage.setItem("user_key", userData.key_adafruit);
         await AsyncStorage.setItem("user_email", email);
         await AsyncStorage.setItem("user_password", password);
         console.log("Đã lưu user_no:", userNo);
@@ -98,68 +124,9 @@ const LoginScreen = () => {
   };
 
   return (
-    // <SafeAreaView style={styles.safeArea}>
-    //   <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-    //   <KeyboardAvoidingView
-    //     behavior={Platform.OS === "ios" ? "padding" : "height"}
-    //     style={styles.container}
-    //   >
-    //     <View style={styles.innerContainer}>
-    //       {/* Thêm logo hoặc tiêu đề */}
-    //       <Image
-    //         source={require("../assets/images/icon.png")} // Thay bằng đường dẫn logo của bạn
-    //         style={styles.logo}
-    //       />
-    //       <Text style={styles.title}>Đăng nhập</Text>
-
-    //       {error && <Text style={styles.errorText}>{error}</Text>}
-
-    //       <TextInput
-    //         style={styles.input}
-    //         placeholder="Email"
-    //         value={email}
-    //         onChangeText={setEmail}
-    //         keyboardType="email-address"
-    //         autoCapitalize="none"
-    //         placeholderTextColor="#aaa"
-    //       />
-    //       <TextInput
-    //         style={styles.input}
-    //         placeholder="Mật khẩu"
-    //         value={password}
-    //         onChangeText={setPassword}
-    //         secureTextEntry
-    //         placeholderTextColor="#aaa"
-    //       />
-
-    //       <TouchableOpacity
-    //         style={[styles.button, isLoading && styles.buttonDisabled]}
-    //         onPress={handleLogin}
-    //         disabled={isLoading}
-    //       >
-    //         {isLoading ? (
-    //           <ActivityIndicator size="small" color="#ffffff" />
-    //         ) : (
-    //           <Text style={styles.buttonText}>Đăng nhập</Text>
-    //         )}
-    //       </TouchableOpacity>
-    //       {/* Có thể thêm nút "Quên mật khẩu?" hoặc "Đăng ký" ở đây */}
-    //       <TouchableOpacity
-    //         onPress={() => router.push("/register")} //
-    //       >
-    //         <Text style={{ marginTop: 20, color: "#007AFF" }}>
-    //           Chưa có tài khoản? Đăng ký
-    //         </Text>
-    //       </TouchableOpacity>
-    //     </View>
-    //   </KeyboardAvoidingView>
-    // </SafeAreaView>
-    <ScrollView>
-      <SafeAreaView style={styles.safeArea}>
-        <StatusBar barStyle="dark-content" />
-        {/* Logo */}
-        <View
-          style={{ height: "100%", width: "100%", backgroundColor: "#F2F6FC" }}
+    <>
+        <StatusBar backgroundColor={'#f2f6fc'}/>
+        <View style={{ height: height*1.1, width: "100%", backgroundColor: "#F2F6FC" }}
         >
           <View style={styles.container}>
             {/* Logo */}
@@ -217,7 +184,7 @@ const LoginScreen = () => {
 
                 {/* Forgot password */}
                 <View style={styles.forgotPasswordBox}>
-                  <Text>Forgot password</Text>
+                  <Text style={{fontFamily:'Poppins-Regular'}}>Forgot password</Text>
                 </View>
               </View>
               {/* Loggin Normal*/}
@@ -243,8 +210,7 @@ const LoginScreen = () => {
             </View>
           </View>
         </View>
-      </SafeAreaView>
-    </ScrollView>
+    </>
   );
 };
 
@@ -319,19 +285,14 @@ const styles = StyleSheet.create({
   container: {
     height: "auto",
     marginHorizontal: width * 0.06,
+    gap: height*0.15,
     // backgroundColor: "green",
   },
   containerLogo: {
     marginTop: height * 0.1,
     // backgroundColor: "red",
-    height: "auto",
+    height: height*0.1,
     paddingVertical: height * 0.02,
-  },
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#F2F6FC",
-    height: height,
-    width: width,
   },
   logoBox: {
     margin: 0,
@@ -342,7 +303,7 @@ const styles = StyleSheet.create({
   logoText: {
     color: "#3674B5",
     fontSize: 33,
-    fontWeight: "bold",
+    fontFamily:'Poppins-Bold'
   },
   signupLabel: {
     paddingTop: height * 0.01,
@@ -351,6 +312,7 @@ const styles = StyleSheet.create({
   normalText: {
     color: "black",
     fontSize: 15,
+    fontFamily:'Poppins-Regular'
   },
   signupText: {
     color: "#186DA1",
@@ -361,18 +323,27 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  checkbox: { flexDirection: "row", alignItems: "center" },
+  checkbox: { 
+    flexDirection: "row", 
+    alignItems: "center" 
+  },
   forgotPasswordBox: {
     flexDirection: "row",
     alignItems: "center",
-    paddingRight: 15,
+    paddingRight: 15
   },
-  buttonLoginBox: { alignItems: "center", marginVertical: height * 0.05 },
+  buttonLoginBox: { 
+    alignItems: "center", 
+    marginVertical: height * 0.05 
+  },
   lineSeperateBox: {
     flexDirection: "row",
     alignItems: "center",
   },
-  line: { borderBottomWidth: 1, flex: 1, borderColor: "#CFD2D7" },
+  line: { 
+    borderBottomWidth: 1, 
+    flex: 1, 
+    borderColor: "#CFD2D7" },
 });
 
 export default LoginScreen;

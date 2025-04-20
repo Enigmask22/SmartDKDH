@@ -54,10 +54,9 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   banner_text: {
-    fontSize: 60,
-    fontWeight: "bold",
+    fontSize: 80,
     color: "#203691",
-    fontStyle: "italic",
+    fontFamily:"Crimson-Text-Bold-Italic"
   },
   button: {
     width: width * 0.5,
@@ -75,12 +74,14 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "white",
-    fontSize: 23,
-    fontWeight: "bold",
+    fontSize: 28,
+    fontFamily:'Crimson-Text-SemiBold',
+    paddingBottom:8
   },
   bannerText: {
-    fontSize: 17,
+    fontSize: 20,
     color: "white",
+    fontFamily:'Italiana'
   },
 });
 export default OnboardingScreen;

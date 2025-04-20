@@ -6,6 +6,7 @@ import {
   Alert,
   View,
   Dimensions,
+  Text
 } from "react-native";
 import Constants from "expo-constants";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
@@ -14,6 +15,12 @@ import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { LineChart } from "react-native-chart-kit";
+import { ActivityLogScreen } from "@/components/ActivityLog";
+import ToggleDropdown from "@/components/Dropdown";
+import { StatusBar } from "expo-status-bar";
+import { Sensor } from "@/components/Sensor";
+import { MaterialIcons, Octicons } from "@expo/vector-icons";
+const { width, height } = Dimensions.get("window");
 
 // API configuration
 // const API_BASE_URL = `http://${Constants.expoConfig?.extra?.serverIp}:${Constants.expoConfig?.extra?.apiPort}`;
@@ -33,6 +40,7 @@ export default function MonitorScreen() {
   const [serverIp, setServerIp] = useState(
     API_BASE_URL.replace("http://", "").replace(":8000", "")
   );
+  const [dropdown, setDropDown] = useState<boolean[]>([true, false])
 
   // Lưu trữ dữ liệu lịch sử cho biểu đồ - tăng số lượng điểm dữ liệu
   const [historyData, setHistoryData] = useState<Record<string, number[]>>({
@@ -156,62 +164,24 @@ export default function MonitorScreen() {
     return "📊";
   };
 
-  return (
-    <ScrollView>
-      <ThemedView style={styles.container}>
-        <ThemedView style={styles.titleContainer}>
-          <IconSymbol
-            name="chart.line.uptrend.xyaxis"
-            size={24}
-            color={colorScheme === "dark" ? "#ffffff" : "#000000"}
-          />
-          <ThemedText type="title">Giám sát môi trường</ThemedText>
-        </ThemedView>
+  const chartTriggerComponent = (
+    <View style={styles.triggerContent}>
+      <Text style={styles.triggerText}>Sensor Data Chart</Text>
+      <Text style={styles.triggerIcon}>{!dropdown[0] ? <MaterialIcons name="navigate-next" size={24} color="black" /> : <MaterialIcons name="keyboard-arrow-down" size={24} color="black" />}</Text>
+    </View>
+  );
+  
+  const logTriggerComponent = (
+    <View style={styles.triggerContent}>
+      <Text style={styles.triggerText}>Activity Log</Text>
+      <Text style={styles.triggerIcon}>{!dropdown[1] ? <MaterialIcons name="navigate-next" size={24} color="black" /> : <MaterialIcons name="keyboard-arrow-down" size={24} color="black" />}</Text>
+    </View>
+  );
 
-        <ThemedView style={styles.connectionStatus}>
-          <ThemedText>
-            Trạng thái kết nối: {connectionStatus}
-            {/* ({serverIp}) */}
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedView style={styles.sensorCardsContainer}>
-          {sensorDevices.map((deviceId) => (
-            <ThemedView
-              key={deviceId}
-              style={[
-                styles.sensorCard,
-                { borderColor: getSensorColor(deviceId) },
-              ]}
-            >
-              <ThemedView
-                style={[
-                  styles.sensorIconContainer,
-                  { backgroundColor: getSensorColor(deviceId) },
-                ]}
-              >
-                <ThemedText style={styles.sensorIcon}>
-                  {getSensorIcon(deviceId)}
-                </ThemedText>
-              </ThemedView>
-              <ThemedView style={styles.sensorInfo}>
-                <ThemedText type="defaultSemiBold">
-                  {deviceDescriptions[deviceId]}
-                </ThemedText>
-                <ThemedText style={styles.sensorValue}>
-                  {parseFloat(sensorValues[deviceId] || "0").toFixed(1)}
-                  {deviceUnits[deviceId]}
-                </ThemedText>
-              </ThemedView>
-            </ThemedView>
-          ))}
-        </ThemedView>
-
-        <ThemedText type="defaultSemiBold" style={styles.chartTitle}>
-          Biểu đồ theo dõi
-        </ThemedText>
-
-        {sensorDevices.map((deviceId) => (
+  const DataChart = (
+    <ThemedView style={styles.dataChart}>
+      <Sensor/>
+      {sensorDevices.map((deviceId) => (
           <ThemedView key={`chart-${deviceId}`} style={styles.chartContainer}>
             <ThemedText type="defaultSemiBold">
               {deviceDescriptions[deviceId]}
@@ -240,7 +210,7 @@ export default function MonitorScreen() {
                   },
                 ],
               }}
-              width={screenWidth - 50}
+              width={screenWidth - 55}
               height={200}
               yAxisLabel=""
               yAxisSuffix={deviceUnits[deviceId] || ""}
@@ -284,51 +254,52 @@ export default function MonitorScreen() {
               withShadow={false}
             />
           </ThemedView>
-        ))}
-      </ThemedView>
-    </ScrollView>
+      ))}
+    </ThemedView>
+  )
+
+  return (
+    <>
+      <StatusBar backgroundColor="#f2f6fc"/>
+      <View style={{flexDirection:"column", paddingTop:height*0.06, height:height*0.86, backgroundColor:'#f2f6fc'}}>
+      <View style={styles.titleContainer}>
+        <View style={styles.title}>
+          <Octicons name="gear" size={30} color="black" />
+          <ThemedText type="title" style={{fontSize:25}}> Data Overview</ThemedText>
+        </View>
+      </View>
+        <View style={{height:height*0.7}}>
+        <ToggleDropdown 
+          id="chart"
+          state={dropdown[0]}
+          stateChange={setDropDown}
+          triggerComponent={chartTriggerComponent}
+          dropdownContent={DataChart}
+        />
+        <ToggleDropdown 
+          id="activity"
+          state={dropdown[1]}
+          stateChange={setDropDown}
+          triggerComponent={logTriggerComponent}
+          dropdownContent={<ActivityLogScreen/>}
+        />
+        </View>
+      </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
-  headerImage: {
-    bottom: -90,
-    left: -35,
-    position: "absolute",
-  },
   titleContainer: {
-    flexDirection: "row",
+    height: height * 0.06,
     alignItems: "center",
-    gap: 8,
-    marginBottom: 16,
+    gap: 50
   },
-  connectionStatus: {
-    marginBottom: 16,
-    padding: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#ccc",
+  title: {
+    flexDirection: 'row',
   },
-  sensorCardsContainer: {
-    flexDirection: "column",
-    marginBottom: 20,
-  },
-  sensorCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    borderWidth: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+  dataChart: {
+    backgroundColor: '#f2f6fc',
   },
   sensorIconContainer: {
     width: 60,
@@ -362,7 +333,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
     alignSelf: "center",
-    width: "98%",
+    width: "90%",
     overflow: "hidden",
   },
   chart: {
@@ -370,5 +341,27 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignSelf: "center",
     marginRight: 10,
+  },
+  triggerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 8,
+  },
+  triggerText: {
+    fontSize: 20,
+    fontFamily:'Poppins-Bold',
+    color: '#2666de',
+  },
+  untriggerIcon: {
+    fontSize: 30,
+    color: '#6c757d',
+  },
+  triggerIcon: {
+    fontSize: 30,
+    color: '#6c757d',
+  },
+  dropdownsContainer: {
+
   },
 });

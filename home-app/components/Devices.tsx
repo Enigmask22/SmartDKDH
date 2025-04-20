@@ -10,6 +10,7 @@ type Props = {
     runningFan: number,
     availFan: number,
 }
+
 export function Devices(props: Props) {
     const Device = [['light', props.availLed, props.runningLed], ['fan', props.availFan, props.runningFan]]
     return (

@@ -16,6 +16,7 @@ import Octicons from '@expo/vector-icons/Octicons';
 import InputBox from "@/components/Input";
 import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 
 const { width, height } = Dimensions.get("window");
 // API configuration
@@ -44,33 +45,51 @@ export default function ProfileScreen() {
   }, []);
 
   
+  // useEffect(() => {
+  //   async function fetchUserData(userId: number | null = userNo): Promise<Record<string, string>> {
+  //   if (userId == null) throw new Error(`User id is null`);
+  //   try {
+  //     const response = await fetch(`https://smartdkdh.onrender.com/api/users/${userId}`);
+      
+  //     if (!response.ok) {
+  //       throw new Error(`Failed to fetch user data: ${response.status} ${response.statusText}`);
+  //     }
+      
+  //     const data: Record<string, string> = await response.json();
+  //     setUserData(data)
+  //     console.log(data)
+  //     return userData;
+  //   } catch (error) {
+  //     console.error("Error fetching user data:", error);
+  //     throw error;
+  //   }
+  // }
+
+  // fetchUserData()
+  // }, [userNo]);
+
   useEffect(() => {
-    async function fetchUserData(userId: number | null = userNo): Promise<Record<string, string>> {
-    if (userId == null) throw new Error(`User id is null`);
-    try {
-      const response = await fetch(`https://smartdkdh.onrender.com/api/users/${userId}`);
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch user data: ${response.status} ${response.statusText}`);
-      }
-      
-      const data: Record<string, string> = await response.json();
-      setUserData(data)
-      console.log(data)
-      return userData;
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      throw error;
-    }
+    async function fetchUserData() {
+      let name = await AsyncStorage.getItem("user_name");
+      let email = await AsyncStorage.getItem("user_email");
+      let ada = await AsyncStorage.getItem("user_ada");
+      let key = await AsyncStorage.getItem("user_key");
+      setUserData(
+        {name: name != null ? name : "",
+         email: email != null ? email : "",
+         ada: ada != null ? ada : "",
+         key: key != null ? key : ""
+      })
   }
 
   fetchUserData()
-  }, [userNo]);
+  }, []);
 
   const PersonalData = {"username": userData.name, "email": userData.email,"password":userData.password}
   const AdaData =  {"AIO_USERNAME": userData.username_adafruit, "AIO_KEY": userData.key_adafruit}
   return (
     <View style={{backgroundColor:'#ffffff', height: height*1.1}}>
+      <StatusBar backgroundColor="#ffffff"/>
       <View style={styles.titleContainer}>
         <View style={styles.title}>
         <Feather name="user" size={30} color="black" />
