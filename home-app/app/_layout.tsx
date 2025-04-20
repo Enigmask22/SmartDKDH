@@ -21,6 +21,7 @@ export default function RootLayout() {
     "Poppins-Bold": require("../assets/fonts/Poppins-Bold.ttf"),
     "Poppins-Regular": require("../assets/fonts/Poppins-Regular.ttf"),
     "Poppins-Light": require("../assets/fonts/Poppins-Light.ttf"),
+    "Poppins-Medium": require("../assets/fonts/Poppins-Medium.ttf"),
     "Poppins-SemiBold": require("../assets/fonts/Poppins-SemiBold.ttf"),
     "Inter-Light": require("../assets/fonts/Inter-Light-BETA.otf"),
     "Inter-ExtraBold": require("../assets/fonts/Inter-ExtraBold.otf"),
@@ -28,6 +29,9 @@ export default function RootLayout() {
     "Quicksand-Semibold": require("../assets/fonts/Quicksand-SemiBold.ttf"),
     "Quicksand-Bold": require("../assets/fonts/Quicksand-Bold.ttf"),
     "Rubik-Regular": require("../assets/fonts/Rubik-Regular.ttf"),
+    "Crimson-Text-Bold-Italic": require("../assets/fonts/CrimsonText-BoldItalic.ttf"),
+    "Crimson-Text-SemiBold": require("../assets/fonts/CrimsonText-SemiBold.ttf"),
+    "Italiana": require("../assets/fonts/Italiana-Regular.ttf"),
   });
   const [isReady, setIsReady] = useState(false); // Trạng thái sẵn sàng của app
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null); // Trạng thái đăng nhập (null: đang kiểm tra)
@@ -83,6 +87,8 @@ export default function RootLayout() {
         "user_no",
         "user_email",
         "user_password",
+        "user_ada",
+        "user_key"
       ]);
       setIsLoggedIn(false);
       router.replace("/login");

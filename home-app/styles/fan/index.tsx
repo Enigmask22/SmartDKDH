@@ -12,19 +12,19 @@ const moderateScale = (size: number, factor = 0.5) =>
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#f2f6fc",
   },
   header: {
-    position: "relative",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: scale(16),
-    paddingTop: verticalScale(20),
+    paddingTop: verticalScale(40),
     paddingBottom: verticalScale(16),
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "#f2f6fc",
   },
   backButton: {
+    padding:20,
     position: "absolute",
     left: scale(16),
     // Adjust top/transform if needed for vertical centering based on header height

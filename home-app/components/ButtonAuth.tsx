@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "white",
     fontSize: 20,
-    fontWeight: "bold",
+    fontFamily:'Poppins-Medium',
     textAlign: "center",
   },
 });

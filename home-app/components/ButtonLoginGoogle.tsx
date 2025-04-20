@@ -17,7 +17,7 @@ const ButtonLoginGoogle = ({
           source={require("../assets/images/google.png")}
           style={styles.logoButton}
         />
-        <Text style={styles.buttonText}>Continue with google</Text>
+        <Text style={styles.buttonText}>Continue with Google</Text>
       </View>
     </TouchableOpacity>
   );

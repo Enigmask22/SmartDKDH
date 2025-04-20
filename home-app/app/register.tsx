@@ -131,10 +131,9 @@ const RegisterScreen = () => {
 
   return (
     <ScrollView>
-      <SafeAreaView style={styles.safeArea}>
         <StatusBar barStyle="dark-content" />
         {/* Logo */}
-        <View style={{ backgroundColor: "#F2F6FC" }}>
+        <View style={{ backgroundColor: "#F2F6FC", height:height*1.1 }}>
           <View style={styles.container}>
             {/* Logo */}
             <View style={styles.containerLogo}>
@@ -173,7 +172,6 @@ const RegisterScreen = () => {
             )}
           </View>
         </View>
-      </SafeAreaView>
     </ScrollView>
   );
 };
@@ -182,16 +180,12 @@ export default RegisterScreen;
 const styles = StyleSheet.create({
   container: {
     marginHorizontal: width * 0.06,
+    gap: height*0.15
   },
   containerLogo: {
+    height: height*0.1,
     marginTop: height * 0.1,
     paddingVertical: height * 0.02,
-  },
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#F2F6FC",
-    height: height,
-    width: width,
   },
   logoBox: {
     margin: 0,
@@ -200,6 +194,6 @@ const styles = StyleSheet.create({
   logoText: {
     color: "#3674B5",
     fontSize: 33,
-    fontWeight: "bold",
+    fontFamily:'Poppins-Bold'
   },
 });

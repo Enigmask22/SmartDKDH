@@ -11,7 +11,7 @@ const moderateScale = (size: number, factor = 0.5) =>
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#f2f6fc",
   },
   header: {
     position: "relative",
@@ -19,13 +19,13 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: scale(16),
-    paddingTop: verticalScale(20),
+    paddingTop: 50,
     paddingBottom: verticalScale(16),
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "#f2f6fc",
   },
   backButton: {
     position: "absolute",
-    left: scale(16),
+    left: scale(20),
   },
   headerTitle: {
     fontSize: moderateScale(18),
