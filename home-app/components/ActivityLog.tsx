@@ -6,15 +6,17 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
-  SafeAreaView,
   Platform,
   StatusBar,
+  ScrollView,
+  Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
 import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
+const { width, height } = Dimensions.get("window"); 
 
 // ... (interface LogEntry, component LogItem giữ nguyên) ...
 interface LogEntry {
@@ -76,7 +78,7 @@ const LogItem = React.memo(({ item }: { item: LogEntry }) => {
   );
 });
 
-const ActivityLogScreen = () => {
+export const ActivityLogScreen = () => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true); // Ban đầu là loading để lấy user_no
   const [error, setError] = useState<string | null>(null);
@@ -175,14 +177,8 @@ const ActivityLogScreen = () => {
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar
-        barStyle={Platform.OS === "ios" ? "dark-content" : "light-content"}
-        backgroundColor="#f8f9fa"
-      />
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Lịch sử hoạt động</Text>
-      </View>
+    <View style={styles.safeArea}>
+      <ScrollView style={{height:'auto'}} >
       {/* Hiển thị loading ban đầu khi đang lấy user_no hoặc fetch lần đầu */}
       {isLoading && !refreshing ? (
         <View style={styles.loadingContainer}>
@@ -199,6 +195,7 @@ const ActivityLogScreen = () => {
           keyExtractor={(item) => item._id}
           contentContainerStyle={styles.listContainer}
           ListEmptyComponent={renderEmptyList}
+          scrollEnabled={false} 
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -210,7 +207,8 @@ const ActivityLogScreen = () => {
           ItemSeparatorComponent={() => <View style={styles.separator} />}
         />
       )}
-    </SafeAreaView>
+      </ScrollView>
+    </View>
   );
 };
 
@@ -218,8 +216,7 @@ const ActivityLogScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#f8f9fa", // Màu nền sáng, sạch sẽ
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0, // Tránh đè lên status bar Android
+    backgroundColor: "#f8f9fa",
   },
   header: {
     paddingHorizontal: 16,
@@ -316,5 +313,3 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
-
-export default ActivityLogScreen;
