@@ -1,7 +1,8 @@
-import { View, StyleSheet, Text, Dimensions } from "react-native";
+import { View, StyleSheet, Text, Dimensions, TouchableOpacity } from "react-native";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, RelativePathString } from "expo-router";
+import { useRouter } from "expo-router";
 
 const { width, height } = Dimensions.get("window");
 
@@ -12,6 +13,7 @@ interface SummaryCardProps {
 }
 
 export default function DeviceCard({ avail, on, type }: SummaryCardProps) {
+  const router = useRouter();
   return (
     <View style={styles.card}>
       <View style={styles.row}>
@@ -22,9 +24,11 @@ export default function DeviceCard({ avail, on, type }: SummaryCardProps) {
             <MaterialCommunityIcons name="fan" size={40} color="black" />
           )}
         </View>
-        <Link href={`/(list)/${type}` as RelativePathString}>
+        <TouchableOpacity onPress={() => {
+          type == "light" ? router.push("/(list)/light") : router.push("/(list)/fan")
+        }}>
           <Feather name="info" size={24} color="black" />
-        </Link>
+        </TouchableOpacity>
       </View>
       <View style={styles.row}>
         <View style={styles.titleContainer}>
