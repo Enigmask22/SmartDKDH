@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Text,
   Image,
@@ -10,9 +10,10 @@ import {
   View,
   Button,
   StatusBar,
+  ActivityIndicator,
+  Animated,
+  Easing,
 } from "react-native";
-import { Audio } from "expo-av";
-import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { HelloWave } from "@/components/HelloWave";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
@@ -21,7 +22,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 import { Dimensions } from "react-native";
-import { Feather, Octicons } from "@expo/vector-icons";
+import { Feather, Octicons, MaterialIcons } from "@expo/vector-icons";
 import { Info } from "@/components/Info";
 import { Sensor } from "@/components/Sensor";
 import { Devices } from "@/components/Devices";
@@ -30,8 +31,62 @@ import { router } from "expo-router";
 
 const { width, height } = Dimensions.get("window");
 // API configuration
-// const API_BASE_URL = `http://${Constants.expoConfig?.extra?.serverIp}:${Constants.expoConfig?.extra?.apiPort}`;
 const API_BASE_URL = `https://smartdkdh.onrender.com`;
+
+// Loading component with skeleton effect
+const LoadingSkeleton = () => {
+  const opacity = useRef(new Animated.Value(0.3)).current;
+
+  useEffect(() => {
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, {
+          toValue: 0.7,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 0.3,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    animation.start();
+
+    return () => {
+      animation.stop();
+    };
+  }, []);
+
+  return (
+    <View style={styles.loadingContainer}>
+      <Animated.View style={[styles.loadingInfo, { opacity }]} />
+      <Animated.View style={[styles.loadingSensor, { opacity }]} />
+      <Animated.View style={[styles.loadingDevices, { opacity }]} />
+    </View>
+  );
+};
+
+// Error component with retry button
+const ErrorView = ({ onRetry }: {
+  onRetry: () => void;
+}) => {
+  return (
+    <View style={styles.errorContainer}>
+      <MaterialIcons name="error-outline" size={70} color="#f44336" />
+      <Text style={styles.errorTitle}>Connection Error</Text>
+      <Text style={styles.errorMessage}>
+        Unable to connect to the server. Please check your internet connection and try again.
+      </Text>
+      <TouchableOpacity style={styles.retryButton} onPress={onRetry}>
+        <Text style={styles.retryButtonText}>Try Again</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const [ledDevices, setLedDevices] = useState<string[]>([]);
@@ -39,27 +94,17 @@ export default function HomeScreen() {
   const [fanDevices, setFanDevices] = useState<string[]>([]);
   const [fanStatuses, setFanStatuses] = useState<Record<string, string>>({});
   const [fanValues, setFanValues] = useState<Record<string, number>>({});
-  const [deviceDescriptions, setDeviceDescriptions] = useState<
-    Record<string, string>
-  >({});
+  const [deviceDescriptions, setDeviceDescriptions] = useState<Record<string, string>>({});
   const [connectionStatus, setConnectionStatus] = useState("Connecting...");
   const [serverIp, setServerIp] = useState(
     API_BASE_URL.replace("http://", "").replace(":8000", "")
   );
   const [userNo, setUserNo] = useState<number | null>(null);
 
-  const logOut = async () => {
-    try {
-      await AsyncStorage.multiRemove([
-        "user_no",
-        "user_email",
-        "user_password",
-      ]);
-      router.replace("/login");
-    } catch (e) {
-      console.error("Lỗi khi đăng xuất:", e);
-    }
-  };
+  // Add loading and error states
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   // Lấy user_no từ AsyncStorage
   useEffect(() => {
     const getUserNo = async () => {
@@ -79,19 +124,28 @@ export default function HomeScreen() {
     getUserNo();
   }, []);
 
-  // Fetch LED devices
+  // Fetch all devices
   useEffect(() => {
-    fetchLeds();
-  }, [serverIp]);
+    const fetchAllDevices = async () => {
+      setIsLoading(true);
+      setError(null);
 
-  // Fetch LED devices
-  useEffect(() => {
-    fetchFans();
+      try {
+        // Fetch data in parallel
+        await Promise.all([fetchLeds(), fetchFans()]);
+      } catch (err: any) {
+        setError(err.message || "Failed to fetch devices");
+        console.error("Error fetching devices:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAllDevices();
   }, [serverIp]);
 
   // WebSocket connection
   useEffect(() => {
-    // const wsUrl = `ws://${serverIp}:8000/ws`;
     const wsUrl = `wss://smartdkdh.onrender.com/ws`;
     const ws = new WebSocket(wsUrl);
 
@@ -103,7 +157,6 @@ export default function HomeScreen() {
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        //console.log("Received data:", data);
         if (data.led_statuses) {
           setLedStatuses(data.led_statuses);
         }
@@ -132,8 +185,12 @@ export default function HomeScreen() {
 
   const fetchLeds = async () => {
     try {
-      // const response = await fetch(`http://${serverIp}:8000/led-devices`);
       const response = await fetch(`${API_BASE_URL}/led-devices`);
+
+      if (!response.ok) {
+        throw new Error(`LED API error: ${response.status}`);
+      }
+
       const data = await response.json();
       const devices = data.devices;
 
@@ -149,21 +206,22 @@ export default function HomeScreen() {
         }
       );
 
-      setDeviceDescriptions(descriptions);
+      setDeviceDescriptions((prev) => ({ ...prev, ...descriptions }));
       setLedStatuses(initialStatuses);
     } catch (error) {
       console.error("Error fetching LED devices:", error);
-      Alert.alert(
-        "Connection Error",
-        "Could not connect to the server. Please check your server IP address."
-      );
+      throw error;
     }
   };
 
   const fetchFans = async () => {
     try {
-      // const response = await fetch(`http://${serverIp}:8000/fan-devices`);
       const response = await fetch(`${API_BASE_URL}/fan-devices`);
+
+      if (!response.ok) {
+        throw new Error(`Fan API error: ${response.status}`);
+      }
+
       const data = await response.json();
       const devices = data.devices;
 
@@ -179,14 +237,23 @@ export default function HomeScreen() {
         }
       );
 
-      setDeviceDescriptions(descriptions);
+      setDeviceDescriptions((prev) => ({ ...prev, ...descriptions }));
       setFanValues(initialValues);
     } catch (error) {
       console.error("Error fetching Fan devices:", error);
-      Alert.alert(
-        "Error",
-        "Could not connect to the server. Please check your connection."
-      );
+      throw error;
+    }
+  };
+
+  const handleRetry = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      await Promise.all([fetchLeds(), fetchFans()]);
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch devices");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -211,39 +278,57 @@ export default function HomeScreen() {
     return running;
   };
 
+  const renderContent = () => {
+    if (isLoading) {
+      return <LoadingSkeleton />;
+    }
+
+    if (error) {
+      return <ErrorView onRetry={handleRetry} />;
+    }
+
+    return (
+      <>
+        <Info device={getRunningDeviceNumber()} online={userNo != null} />
+        <Sensor />
+        <Devices
+          runningFan={getRunningFanNumber()}
+          availFan={fanDevices.length}
+          runningLed={getRunningLedNumber()}
+          availLed={ledDevices.length}
+        />
+      </>
+    );
+  };
+
   return (
     <>
-    <StatusBar backgroundColor={'#f2f6fc'} />
-    <View
-      style={{
-        backgroundColor: "#f2f6fc",
-        height: height,
-        alignItems: "center",
-      }}
-    >
-      <View style={styles.titleContainer}>
-        <View style={styles.title}>
-          <Feather name="home" size={30} color="black" />
-          <Text style={{ fontSize: 25, fontFamily: "Poppins-SemiBold" }}>
-            {" "}
-            Home
-          </Text>
+      <StatusBar backgroundColor={'#f2f6fc'} />
+      <View
+        style={{
+          backgroundColor: "#f2f6fc",
+          height: height,
+          alignItems: "center",
+        }}
+      >
+        <View style={styles.titleContainer}>
+          <View style={styles.title}>
+            <Feather name="home" size={30} color="black" />
+            <Text style={{ fontSize: 25, fontFamily: "Poppins-SemiBold" }}>
+              {" "}
+              Home
+            </Text>
+          </View>
         </View>
+
+        {renderContent()}
       </View>
-      <Info device={getRunningDeviceNumber()} online={userNo != null} />
-      <Sensor />
-      <Devices
-        runningFan={getRunningFanNumber()}
-        availFan={fanDevices.length}
-        runningLed={getRunningLedNumber()}
-        availLed={ledDevices.length}
-      />
-    </View>
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  // Existing styles...
   titleContainer: {
     backgroundColor: "#f2f6fc",
     height: height * 0.12,
@@ -260,6 +345,83 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: width / 1.5,
   },
+
+  // Loading skeleton styles
+  loadingContainer: {
+    width: '90%',
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loadingInfo: {
+    width: '100%',
+    height: 100,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 15,
+    marginBottom: 20,
+  },
+  loadingSensor: {
+    width: '100%',
+    height: 150,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 15,
+    marginBottom: 20,
+  },
+  loadingDevices: {
+    width: '100%',
+    height: 180,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 15,
+  },
+
+  // Error styles
+  errorContainer: {
+    width: '85%',
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 25,
+    marginTop: 40,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  errorTitle: {
+    fontSize: 22,
+    fontFamily: 'Poppins-Bold',
+    color: '#f44336',
+    marginTop: 15,
+    marginBottom: 10,
+  },
+  errorMessage: {
+    fontSize: 16,
+    fontFamily: 'Poppins-Regular',
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 25,
+  },
+  retryButton: {
+    backgroundColor: '#3674B5',
+    paddingHorizontal: 30,
+    paddingVertical: 12,
+    borderRadius: 30,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.5,
+  },
+  retryButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontFamily: 'Poppins-Medium',
+  },
+
+  // Other existing styles...
   serverConfig: {
     marginBottom: 16,
     padding: 12,
@@ -272,95 +434,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginVertical: 8,
   },
-  ledControlsContainer: {
-    marginBottom: 16,
-  },
-  ledItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: "#ccc",
-  },
-  ledIndicator: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  ledOn: {
-    backgroundColor: "#4CAF50",
-  },
-  ledOff: {
-    backgroundColor: "#666",
-  },
-  ledStatusText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  ledInfo: {
-    flex: 1,
-  },
-  toggleButton: {
-    backgroundColor: "#2196F3",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 4,
-  },
-  buttonText: {
-    color: "#fff",
-  },
-  voiceControlContainer: {
-    alignItems: "center",
-    marginVertical: 16,
-  },
-  micButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#4CAF50",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  listeningButton: {
-    backgroundColor: "#ff4444",
-  },
-  micButtonText: {
-    fontSize: 24,
-  },
-  voiceHint: {
-    fontStyle: "italic",
-    textAlign: "center",
-    marginTop: 8,
-  },
-  controlButtonsRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 20,
-  },
-  autoButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#2196F3",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  autoButtonActive: {
-    backgroundColor: "#FF9800",
-  },
-  autoButtonText: {
-    fontSize: 24,
-  },
-  disabledButton: {
-    backgroundColor: "#cccccc",
-    opacity: 0.7,
-  },
+  // ...remaining existing styles
 });

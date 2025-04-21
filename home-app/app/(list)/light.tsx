@@ -8,9 +8,10 @@ import {
   Platform,
   StatusBar,
   Dimensions,
+  Animated,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { router } from "expo-router";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/store";
@@ -20,7 +21,6 @@ import {
   toggleLed,
   toggleAutoMode,
 } from "@/store/ledDevicesSlice";
-import { useEffect } from "react";
 import DeviceCard from "@/components/card/index";
 import SummaryCard from "@/components/card/Summary";
 import { setSensorValues } from "@/store/sensorSlice";
@@ -31,9 +31,113 @@ import { styles } from "@/styles/light";
 import { handleForAll } from "@/actions/light/handleVoiceCommand";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { ThemedText } from "@/components/ThemedText";
+import { Feather } from "@expo/vector-icons";
 const { width, height } = Dimensions.get("window");
 
 const API_BASE_URL = "https://smartdkdh.onrender.com";
+
+// Skeleton component for light cards
+const SkeletonCard = () => {
+  const opacity = useRef(new Animated.Value(0.3)).current;
+
+  useEffect(() => {
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, {
+          toValue: 0.8,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 0.3,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    
+    animation.start();
+    
+    return () => {
+      animation.stop();
+    };
+  }, []);
+
+  return (
+    <Animated.View 
+      style={[
+        styles.skeletonCardContainer, 
+        { opacity }
+      ]}
+    >
+      <View style={styles.skeletonIcon} />
+      <View style={styles.skeletonTitle} />
+      <View style={styles.skeletonSwitch} />
+    </Animated.View>
+  );
+};
+
+// Skeleton component for summary card
+const SkeletonSummary = () => {
+  const opacity = useRef(new Animated.Value(0.3)).current;
+
+  useEffect(() => {
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, {
+          toValue: 0.8,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 0.3,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    
+    animation.start();
+    
+    return () => {
+      animation.stop();
+    };
+  }, []);
+
+  return (
+    <Animated.View 
+      style={[
+        styles.skeletonSummaryContainer, 
+        { opacity }
+      ]}
+    >
+      <View style={styles.skeletonSummaryItem} />
+      <View style={styles.skeletonSummaryItem} />
+      <View style={styles.skeletonSummaryItem} />
+    </Animated.View>
+  );
+};
+
+// Error state component
+const ErrorState = ({ message, onRetry } : {
+  message?: string; 
+  onRetry: () => void;
+}) => {
+  return (
+    <View style={styles.errorContainer}>
+      <Feather name="wifi-off" size={64} color="#f44336" />
+      <Text style={styles.errorTitle}>Connection Error</Text>
+      <Text style={styles.errorMessage}>{message || "Unable to load lights data"}</Text>
+      <TouchableOpacity 
+        style={styles.retryButton}
+        onPress={onRetry}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.retryButtonText}>Try Again</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
 
 export default function LightList() {
   // khởi tạo state cho các hành động cần thiết
@@ -51,16 +155,22 @@ export default function LightList() {
     (state: RootState) => state.ledDevices
   );
   const sensor = useSelector((state: RootState) => state.sensor);
-  const onBulbs = devices.filter((bulb) => bulb.status === "1").length;
-  const offBulbs = devices.length - onBulbs;
+  
+  // Calculate only if devices are loaded
+  const onBulbs = loading ? 0 : devices.filter((bulb) => bulb.status === "1").length;
+  const offBulbs = loading ? 0 : devices.length - onBulbs;
+
+  // Retry fetching function
+  const handleRetry = () => {
+    dispatch(fetchLedDevices());
+  };
 
   useEffect(() => {
-    dispatch(fetchLedDevices()); // hoặc API_BASE_URL nếu có
+    dispatch(fetchLedDevices());
   }, [dispatch]);
 
   // WebSocket connection
   useEffect(() => {
-    // const wsUrl = `ws://${serverIp}:8000/ws`;
     const wsUrl = `wss://smartdkdh.onrender.com/ws`;
     const ws = new WebSocket(wsUrl);
 
@@ -78,8 +188,6 @@ export default function LightList() {
         if (data.sensor_values) {
           dispatch(setSensorValues(data.sensor_values));
         }
-        console.log("Received data:", data);
-        // data có dạng [ "led-1": 1, "led-2": 0, ... ]
       } catch (error) {
         console.error("Error parsing WebSocket data:", error);
       }
@@ -247,7 +355,6 @@ export default function LightList() {
         name: "recording.m4a",
       } as any);
 
-      // const url = `http://${serverIp}:8000/speech-to-text`;
       const url = `${API_BASE_URL}/speech-to-text`;
       console.log("Sending to URL:", url);
 
@@ -277,10 +384,56 @@ export default function LightList() {
 
       return data.text;
     } catch (error) {
-      // console.error("Error sending audio to server:", error);
       throw error; // Chuyển tiếp lỗi để xử lý ở stopRecording
     }
   }
+
+  // Render content based on loading and error states
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <>
+          <SkeletonSummary />
+          <View style={styles.skeletonGrid}>
+            {[1, 2, 3, 4].map((item) => (
+              <SkeletonCard key={`skeleton-${item}`} />
+            ))}
+          </View>
+        </>
+      );
+    } else if (error) {
+      return <ErrorState message={error} onRetry={handleRetry} />;
+    } else {
+      return (
+        <>
+          <SummaryCard
+            type="bulb"
+            total={devices.length}
+            on={onBulbs}
+            off={offBulbs}
+          />
+          <View style={styles.bulbsGrid}>
+            {devices.map((bulb) => (
+              <DeviceCard
+                key={bulb.id}
+                device={{
+                  ...bulb,
+                  type: "bulb",
+                }}
+              >
+                <Switch
+                  trackColor={{ false: "#e0e0e0", true: "#3b82f6" }}
+                  thumbColor={"#ffffff"}
+                  onValueChange={() => toggleSwitch(bulb.id)}
+                  value={bulb.status === "1"}
+                />
+              </DeviceCard>
+            ))}
+          </View>
+        </>
+      );
+    }
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -298,30 +451,10 @@ export default function LightList() {
           </View>
         </View>
       </View>
-      <SummaryCard
-        type="bulb"
-        total={devices.length}
-        on={onBulbs}
-        off={offBulbs}
-      />
-      <View style={styles.bulbsGrid}>
-        {devices.map((bulb) => (
-          <DeviceCard
-            key={bulb.id}
-            device={{
-              ...bulb,
-              type: "bulb",
-            }}
-          >
-            <Switch
-              trackColor={{ false: "#e0e0e0", true: "#3b82f6" }}
-              thumbColor={"#ffffff"}
-              onValueChange={() => toggleSwitch(bulb.id)}
-              value={bulb.status === "1"}
-            />
-          </DeviceCard>
-        ))}
-      </View>
+      
+      {/* Render dynamic content */}
+      {renderContent()}
+      
       <View style={styles.footer}>
         <TouchableOpacity
           style={[
@@ -329,7 +462,9 @@ export default function LightList() {
             isListening ? styles.listeningButton : null,
           ]}
           onPress={recording ? stopRecording : startRecording}
-          disabled={autoMode}
+          // @ts-ignore
+          disabled={autoMode || loading || error}
+          activeOpacity={0.7}
         >
           {autoMode ? (
             <FontAwesome6 name="superpowers" size={24} color="#4CAF50" />
@@ -338,6 +473,7 @@ export default function LightList() {
               name="keyboard-voice"
               size={24}
               color={isListening ? "#ff4444" : "#4CAF50"}
+              style={{ opacity: loading || error ? 0.5 : 1 }}
             />
           )}
         </TouchableOpacity>
@@ -352,6 +488,7 @@ export default function LightList() {
               fontSize: 16,
               fontWeight: "bold",
               textAlign: "center",
+              color: loading || error ? "#9e9e9e" : "#000",
             }}
           >
             Auto Mode
@@ -359,15 +496,22 @@ export default function LightList() {
           <Switch
             trackColor={{ false: "#e0e0e0", true: "#3b82f6" }}
             thumbColor={"#ffffff"}
+            onValueChange={(value: boolean) => {
+              if (!loading && !error) {
+                dispatch(toggleAutoMode());
+              }
+            }}
+            value={autoMode === true}
             // @ts-ignore
-            onValueChange={() => dispatch(toggleAutoMode())}
-            value={autoMode}
-            style={{ transform: [{ scale: 2 }], margin: 6 }} // Adjust the scale factor as needed
+            disabled={loading || error}
+            style={{ transform: [{ scale: 2 }], margin: 6 }}
           />
         </View>
       </View>
       <VoiceHint>
-        {autoMode
+        {loading ? "Đang tải dữ liệu..." 
+          : error ? "Không thể kết nối đến thiết bị. Vui lòng thử lại." 
+          : autoMode
           ? "Chế độ tự động: LED sẽ điều chỉnh theo ánh sáng"
           : 'Thử nói: "Bật đèn phòng khách", "Tắt đèn số 1" hoặc "Tắt tất cả đèn"'}
       </VoiceHint>
