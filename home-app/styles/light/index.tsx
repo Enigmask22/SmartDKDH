@@ -13,23 +13,19 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f2f6fc",
   },
-  header: {
-    position: "relative",
-    flexDirection: "row",
+  titleContainer: {
+    height: height * 0.1,
     alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: scale(16),
-    paddingTop: 50,
-    paddingBottom: verticalScale(16),
-    backgroundColor: "#f2f6fc",
+    marginBottom: 16,
+    paddingTop:scale(20)
+  },
+  title: {
+    width: width*0.8,
+    flexDirection:'column', 
+    alignItems:'center'
   },
   backButton: {
-    position: "absolute",
-    left: scale(20),
-  },
-  headerTitle: {
-    fontSize: moderateScale(18),
-    fontWeight: "bold",
+    width:width*0.1,
   },
   addButton: {
     backgroundColor: "#3b82f6",

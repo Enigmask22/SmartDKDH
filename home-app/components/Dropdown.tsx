@@ -31,7 +31,7 @@ const ToggleDropdown: React.FC<ToggleDropdownProps> = ({
   dropdownContent,
   triggerStyle,
   dropdownStyle,
-  maxHeight = height*0.7,
+  maxHeight = height < 900 ? height*0.7 : height*0.66,
 }) => {
   const [isOpen, setIsOpen] = useState(state);
   const animatedValue = useRef(new Animated.Value(isOpen ? 1 : 0)).current;
@@ -89,7 +89,7 @@ const ToggleDropdown: React.FC<ToggleDropdownProps> = ({
         ]}
       >
         <ScrollView 
-          contentContainerStyle={{ paddingBottom: 10}}
+          contentContainerStyle={{ paddingBottom: height < 900 ? 0 : 20}}
           showsVerticalScrollIndicator={false}
         >
           {dropdownContent}
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     zIndex: 1,
     width: '100%',
-    maxHeight:height*0.80
+    maxHeight: height < 900 ? height*0.8 : height*0.715
   },
   trigger: {
     backgroundColor: '#ffffff',

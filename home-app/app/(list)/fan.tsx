@@ -6,6 +6,8 @@ import {
   Switch,
   Alert,
   Platform,
+  StatusBar,
+  Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
@@ -27,6 +29,8 @@ import { handleForAll } from "@/actions/fan/handleVoiceCommand";
 import { styles } from "@/styles/fan";
 import { VoiceHint } from "@/components/ui/VoiceHint";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import { ThemedText } from "@/components/ThemedText";
+const { width, height } = Dimensions.get("window");
 
 const API_BASE_URL = `https://smartdkdh.onrender.com`;
 
@@ -266,14 +270,19 @@ export default function FanList() {
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-        >
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Smart Fan</Text>
+      <StatusBar backgroundColor="#f2f6fc"/>
+      <View style={styles.titleContainer}>
+        <View style={{flexDirection:'row', width:width}}>
+          <View style={styles.backButton}></View>
+          <View style={styles.title}>
+            <ThemedText type="title" style={{fontSize:25}}> Smart Fan</ThemedText>
+          </View>
+          <View style={styles.backButton}>
+          <TouchableOpacity onPress={() => router.back()}>
+              <Ionicons name="chevron-forward" size={24} color="black"/>
+          </TouchableOpacity>
+          </View>
+        </View>
       </View>
       <SummaryCard
         total={devices.length}

@@ -14,21 +14,19 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f2f6fc",
   },
-  header: {
-    flexDirection: "row",
+  titleContainer: {
+    height: height * 0.1,
     alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: scale(16),
-    paddingTop: verticalScale(40),
-    paddingBottom: verticalScale(16),
-    backgroundColor: "#f2f6fc",
+    marginBottom: 16,
+    paddingTop:scale(20)
+  },
+  title: {
+    width: width*0.8,
+    flexDirection:'column', 
+    alignItems:'center'
   },
   backButton: {
-    padding:20,
-    position: "absolute",
-    left: scale(16),
-    // Adjust top/transform if needed for vertical centering based on header height
-    top: verticalScale(20), // Example: align with paddingTop
+    width:width*0.1,
   },
   headerTitle: {
     fontSize: moderateScale(18),
