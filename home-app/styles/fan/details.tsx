@@ -63,7 +63,6 @@ export const styles = StyleSheet.create({
     height: verticalScale(200),
   },
   fanValueContainer: {
-    marginVertical: verticalScale(10),
     alignItems: "center",
   },
   fanValueText: {
@@ -81,7 +80,7 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 10,
     elevation: 3,
-    marginTop: verticalScale(20),
+    marginTop:verticalScale(20)
   },
   infoBoxContainer: {
     flexDirection: "row",
@@ -169,7 +168,6 @@ export const styles = StyleSheet.create({
   titleContainer: {
     height: height * 0.1,
     alignItems: "center",
-    marginBottom: verticalScale(16),
   },
 
   serverConfig: {
@@ -213,7 +211,6 @@ export const styles = StyleSheet.create({
   sliderContainer: {
     width: "100%",
     paddingHorizontal: scale(10),
-    marginVertical: verticalScale(15),
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
