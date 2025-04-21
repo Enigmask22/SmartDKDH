@@ -1,16 +1,16 @@
-import { View, Text, TouchableOpacity, Platform } from "react-native";
-import { Ionicons } from '@expo/vector-icons';
-import Entypo from '@expo/vector-icons/Entypo';
+import { View, Text, TouchableOpacity, Platform, Switch } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import Entypo from "@expo/vector-icons/Entypo";
 import { router } from "expo-router";
-import { useState, useEffect } from "react";
-import Slider from '@react-native-community/slider';
+import { useState, useEffect, useRef } from "react";
+import Slider from "@react-native-community/slider";
 import { toggleFan, setFanValue } from "@/store/fanDevicesSlice";
 import { AppDispatch, RootState } from "@/store";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "expo-router/build/hooks";
 import { Audio } from "expo-av";
 import { Alert } from "react-native";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import LottieView from "lottie-react-native";
 import { handleForOne } from "@/actions/fan/handleVoiceCommand";
 import { FanNotFound } from "@/components/notFound/fan";
@@ -19,8 +19,17 @@ import PowerButton from "@/components/ui/PowerButton";
 import { VoiceHint } from "@/components/ui/VoiceHint";
 import { setSensorValues } from "@/store/sensorSlice";
 import { setAllValues } from "@/store/fanDevicesSlice";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const API_BASE_URL = `https://smartdkdh.onrender.com`;
+
+// Các tùy chọn thời gian hẹn giờ (phút)
+const TIMER_OPTIONS = [
+  { label: "30 min", value: 30 },
+  { label: "1 h", value: 60 },
+  { label: "2 h", value: 120 },
+  { label: "5 h", value: 300 },
+];
 
 export default function FanDetails() {
   const [connectionStatus, setConnectionStatus] = useState("Connecting...");
@@ -28,18 +37,154 @@ export default function FanDetails() {
   const [isListening, setIsListening] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
   const searchParams = useSearchParams();
-  const id = searchParams.get('id');
+  const id = searchParams.get("id");
   const [serverIp, setServerIp] = useState(
     API_BASE_URL.replace("http://", "").replace(":8000", "")
   );
 
+  // Timer Mode states
+  const [timerEnabled, setTimerEnabled] = useState(false);
+  const [selectedTimer, setSelectedTimer] = useState<number | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
   const autoMode = useSelector((state: RootState) => state.fanDevices.autoMode);
   // Lấy thông tin device từ Redux store
   const devices = useSelector((state: RootState) => state.fanDevices.devices);
-  const fan = devices.find(device => device.id === id);
+  const fan = devices.find((device) => device.id === id);
 
   // Lấy thông tin cảm biến từ Redux store
   const sensor = useSelector((state: RootState) => state.sensor);
+
+  // Load timer state from AsyncStorage on component mount
+  useEffect(() => {
+    if (fan?.id) {
+      loadTimerState();
+    }
+  }, [fan?.id]);
+
+  // Save timer state to AsyncStorage whenever it changes
+  useEffect(() => {
+    if (fan?.id) {
+      saveTimerState();
+    }
+  }, [timerEnabled, selectedTimer, timeRemaining]);
+
+  // Handle timer countdown
+  useEffect(() => {
+    if (
+      timerEnabled &&
+      timeRemaining !== null &&
+      timeRemaining > 0 &&
+      fan &&
+      fan.value > 0
+    ) {
+      timerRef.current = setInterval(() => {
+        setTimeRemaining((prev) => {
+          if (prev !== null && prev > 0) {
+            return prev - 1;
+          }
+          return 0;
+        });
+      }, 1000);
+    } else if (timerEnabled && timeRemaining === 0 && fan && fan.value > 0) {
+      // Turn off fan when timer reaches 0
+      handleToggleFan(fan.id, "off");
+      setTimerEnabled(false);
+      setTimeRemaining(null);
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [timerEnabled, timeRemaining, fan?.value]);
+
+  const loadTimerState = async () => {
+    try {
+      const timerStateStr = await AsyncStorage.getItem(`fan_timer_${fan?.id}`);
+      if (timerStateStr) {
+        const timerState = JSON.parse(timerStateStr);
+        setTimerEnabled(timerState.enabled);
+        setSelectedTimer(timerState.selectedTimer);
+
+        // Check if there's a timer running and calculate remaining time
+        if (timerState.enabled && timerState.endTime) {
+          const now = new Date().getTime();
+          const endTime = timerState.endTime;
+          const remaining = Math.max(0, Math.floor((endTime - now) / 1000));
+
+          if (remaining > 0) {
+            setTimeRemaining(remaining);
+          } else {
+            // Timer has already expired
+            setTimerEnabled(false);
+            setTimeRemaining(null);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load timer state:", error);
+    }
+  };
+
+  const saveTimerState = async () => {
+    try {
+      const endTime = timeRemaining
+        ? new Date().getTime() + timeRemaining * 1000
+        : null;
+
+      const timerState = {
+        enabled: timerEnabled,
+        selectedTimer,
+        endTime,
+      };
+      await AsyncStorage.setItem(
+        `fan_timer_${fan?.id}`,
+        JSON.stringify(timerState)
+      );
+    } catch (error) {
+      console.error("Failed to save timer state:", error);
+    }
+  };
+
+  const handleTimerToggle = (value: boolean) => {
+    if (value && selectedTimer) {
+      setTimerEnabled(true);
+      const seconds = selectedTimer * 60;
+      setTimeRemaining(seconds);
+    } else {
+      setTimerEnabled(false);
+      setTimeRemaining(null);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    }
+  };
+
+  const handleTimerSelect = (minutes: number) => {
+    setSelectedTimer(minutes);
+    if (timerEnabled) {
+      const seconds = minutes * 60;
+      setTimeRemaining(seconds);
+    }
+  };
+
+  const formatTimeRemaining = () => {
+    if (!timeRemaining) return "";
+
+    const hours = Math.floor(timeRemaining / 3600);
+    const minutes = Math.floor((timeRemaining % 3600) / 60);
+    const seconds = timeRemaining % 60;
+
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds
+        .toString()
+        .padStart(2, "0")}`;
+    }
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
 
   const processCommand = (command: string) => {
     if (fan) {
@@ -53,6 +198,18 @@ export default function FanDetails() {
 
   const handleSetFanValue = (id: string, value: number) => {
     dispatch(setFanValue({ id, value }));
+  };
+
+  const handleDecrease = () => {
+    if (fan && fan.value >= 10) {
+      handleSetFanValue(fan.id, fan.value - 10);
+    }
+  };
+
+  const handleIncrease = () => {
+    if (fan && fan.value <= 90) {
+      handleSetFanValue(fan.id, fan.value + 10);
+    }
   };
 
   async function stopRecording() {
@@ -267,10 +424,10 @@ export default function FanDetails() {
   }, [serverIp]);
 
   if (!fan) {
-    return <FanNotFound />
+    return <FanNotFound />;
   }
   return (
-    <View style={{padding:30, backgroundColor:'#f2f6fc'}}>
+    <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
@@ -280,28 +437,24 @@ export default function FanDetails() {
         </TouchableOpacity>
         <View style={styles.headerContent}>
           <Text style={styles.headerTitle}>Fan {fan.id}</Text>
-          <Text style={styles.description}>{fan.description || "ABC room"}</Text>
+          <Text style={styles.description}>
+            {fan.description || "Living room"}
+          </Text>
         </View>
       </View>
 
-      <View style={{
-        position: "relative",
-      }}>
-        <LottieView
-          source={require("@/animations/fan.json")}
-          style={{ width: "100%", height: 400 }}
-          autoPlay={fan.value > 0}
-          loop={fan.value > 0}
-          speed={fan.value > 0 ? fan.value / 50 : 0} // Adjust the divisor to control max speed
-          progress={fan.value > 0 ? undefined : 0} // Keep at first frame when off
-        />
-        <View style={{
-          ...styles.voiceControlContainer,
-          position: "absolute",
-          top: 10,
-          right: 10,
-        }}>
-          <View style={styles.controlButtonsRow}>
+      <View style={styles.mainContent}>
+        <View style={styles.fanImageContainer}>
+          <LottieView
+            source={require("@/animations/fan.json")}
+            style={styles.fanAnimation}
+            autoPlay={fan.value > 0}
+            loop={fan.value > 0}
+            speed={fan.value > 0 ? fan.value / 50 : 0}
+            progress={fan.value > 0 ? undefined : 0}
+          />
+
+          <View style={styles.voiceControlContainer}>
             <TouchableOpacity
               style={[
                 autoMode ? styles.dissabledMicButton : styles.micButton,
@@ -310,22 +463,36 @@ export default function FanDetails() {
               onPress={recording ? stopRecording : startRecording}
               disabled={autoMode}
             >
-              {
-                autoMode ? (
-                  <MaterialIcons name="voice-over-off" size={24} color={
-                    "#666"
-                  } />
-                ) : (
-                  <MaterialIcons name="keyboard-voice" size={24} color={
-                    isListening ? "#ff4444" : "#4CAF50"
-                  } />
-                )
-              }
+              {autoMode ? (
+                <MaterialIcons name="voice-over-off" size={24} color="#666" />
+              ) : (
+                <MaterialIcons
+                  name="keyboard-voice"
+                  size={24}
+                  color={isListening ? "#ff4444" : "#4CAF50"}
+                />
+              )}
             </TouchableOpacity>
           </View>
         </View>
 
+        <View style={styles.fanValueContainer}>
+          <Text style={styles.fanValueText}>{fan.value}%</Text>
+        </View>
+
         <View style={styles.sliderContainer}>
+          <TouchableOpacity
+            style={styles.sliderButton}
+            onPress={handleDecrease}
+            disabled={autoMode || fan.value <= 0}
+          >
+            <Entypo
+              name="minus"
+              size={20}
+              color={autoMode ? "#ccc" : "#4287f5"}
+            />
+          </TouchableOpacity>
+
           <Slider
             style={styles.slider}
             minimumValue={0}
@@ -333,51 +500,125 @@ export default function FanDetails() {
             step={10}
             value={fan.value || 0}
             onSlidingComplete={(value: number) => {
-              // Chỉ gửi request khi người dùng đã kéo xong
               handleSetFanValue(fan.id, value);
             }}
-            minimumTrackTintColor="#4CAF50"
-            // maximumTrackTintColor={autoMode ? "#cccccc" : "#000000"}
-            thumbTintColor="#4CAF50"
+            minimumTrackTintColor="#4287f5"
+            maximumTrackTintColor="#e0e0e0"
+            thumbTintColor="#4287f5"
             disabled={autoMode}
           />
-          <View
-            style={[
-              styles.fanIndicator,
-              fan?.value > 0 ? styles.fanOn : styles.fanOff,
-            ]}
+
+          <TouchableOpacity
+            style={styles.sliderButton}
+            onPress={handleIncrease}
+            disabled={autoMode || fan.value >= 100}
           >
-            <Text style={styles.fanStatusText}>
-              {fan.value}%
-            </Text>
-          </View>
+            <Entypo
+              name="plus"
+              size={20}
+              color={autoMode ? "#ccc" : "#4287f5"}
+            />
+          </TouchableOpacity>
         </View>
 
-        <View style={styles.buttonGroup}>
-          <TouchableOpacity
-            style={styles.controlButton}
-            onPress={() => handleToggleFan(fan.id, 'decrease')}
-            disabled={autoMode}
-          >
-            <Entypo name="minus" size={24} color="black" />
-          </TouchableOpacity>
-          <PowerButton dissabled={autoMode} isOff={fan.value === 0} onPress={() => { fan.value > 0 ? handleToggleFan(fan.id, 'off') : handleToggleFan(fan.id, 'on'); }} />
-          <TouchableOpacity
-            style={styles.controlButton}
-            onPress={() => handleToggleFan(fan.id, 'increase')}
-            disabled={autoMode}
-          >
-            <Entypo name="plus" size={24} color="black" />
-          </TouchableOpacity>
+        <View style={styles.controlsSection}>
+          <View style={styles.infoBoxContainer}>
+            <View style={styles.infoBox}>
+              <Ionicons name="thermometer-outline" size={20} color="#4287f5" />
+              <Text style={styles.infoBoxText}>
+                {sensor.values.temperature
+                  ? `${sensor.values.temperature}°C`
+                  : "--°C"}
+              </Text>
+              <Text style={styles.infoBoxLabel}>Temperature</Text>
+            </View>
+
+            <View style={styles.powerButtonContainer}>
+              <PowerButton
+                dissabled={autoMode}
+                isOff={fan.value === 0}
+                onPress={() => {
+                  fan.value > 0
+                    ? handleToggleFan(fan.id, "off")
+                    : handleToggleFan(fan.id, "on");
+                }}
+              />
+            </View>
+
+            <View style={styles.infoBox}>
+              <Ionicons name="water-outline" size={20} color="#4287f5" />
+              <Text style={styles.infoBoxText}>
+                {sensor.values.humidity ? `${sensor.values.humidity}%` : "--%"}
+              </Text>
+              <Text style={styles.infoBoxLabel}>Humidity</Text>
+            </View>
+          </View>
+
+          <View style={styles.timerSection}>
+            <View style={styles.timerHeaderRow}>
+              <Text style={styles.timerTitle}>Timer</Text>
+              <Switch
+                value={timerEnabled}
+                onValueChange={handleTimerToggle}
+                trackColor={{ false: "#ddd", true: "#4287f5" }}
+                thumbColor={timerEnabled ? "#fff" : "#fff"}
+                disabled={autoMode || !selectedTimer}
+              />
+              {timerEnabled && timeRemaining && (
+                <Text style={styles.timerCountdown}>
+                  {formatTimeRemaining()}
+                </Text>
+              )}
+            </View>
+
+            <View style={styles.timerOptionsContainer}>
+              {TIMER_OPTIONS.map((option) => (
+                <TouchableOpacity
+                  key={option.value}
+                  style={[
+                    styles.timerOption,
+                    selectedTimer === option.value &&
+                      styles.timerOptionSelected,
+                  ]}
+                  onPress={() => handleTimerSelect(option.value)}
+                  disabled={autoMode}
+                >
+                  <Text
+                    style={[
+                      styles.timerOptionText,
+                      selectedTimer === option.value &&
+                        styles.timerOptionTextSelected,
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {/* <View style={styles.autoModeSection}>
+            <Text style={styles.autoModeTitle}>Auto Mode</Text>
+            <Switch
+              value={autoMode}
+              onValueChange={(value) => {
+                // Auto mode would be handled in your Redux store or similar
+                // This is just a placeholder
+              }}
+              trackColor={{ false: "#ddd", true: "#4287f5" }}
+              thumbColor={autoMode ? "#fff" : "#fff"}
+            />
+          </View> */}
         </View>
+
         <VoiceHint>
-          {
-            autoMode ? (
-              <Text>Chế độ tự động đang bật</Text>
-            ) : (
-              <Text>Thử nói: "Bật quạt", "Tắt quạt" hoặc "Bật quạt ở mức 60%"</Text>
-            )
-          }
+          {autoMode ? (
+            <Text>Chế độ tự động đang bật</Text>
+          ) : (
+            <Text>
+              Thử nói: "Bật quạt", "Tắt quạt" hoặc "Bật quạt ở mức 60%"
+            </Text>
+          )}
         </VoiceHint>
       </View>
     </View>
