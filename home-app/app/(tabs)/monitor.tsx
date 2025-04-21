@@ -8,7 +8,7 @@ import {
   Dimensions,
   Text,
   Animated,
-  ActivityIndicator
+  ActivityIndicator,
 } from "react-native";
 import Constants from "expo-constants";
 import { ThemedText } from "@/components/ThemedText";
@@ -30,10 +30,14 @@ export default function MonitorScreen() {
   const colorScheme = useColorScheme();
   const [sensorDevices, setSensorDevices] = useState<string[]>([]);
   const [sensorValues, setSensorValues] = useState<Record<string, string>>({});
-  const [deviceDescriptions, setDeviceDescriptions] = useState<Record<string, string>>({});
+  const [deviceDescriptions, setDeviceDescriptions] = useState<
+    Record<string, string>
+  >({});
   const [deviceUnits, setDeviceUnits] = useState<Record<string, string>>({});
   const [connectionStatus, setConnectionStatus] = useState("Connecting...");
-  const [serverIp, setServerIp] = useState(API_BASE_URL.replace("http://", "").replace(":8000", ""));
+  const [serverIp, setServerIp] = useState(
+    API_BASE_URL.replace("http://", "").replace(":8000", "")
+  );
 
   // Replace dropdown state with activeTab state
   const [activeTab, setActiveTab] = useState(0); // 0 = Chart, 1 = Activity Log
@@ -177,7 +181,7 @@ export default function MonitorScreen() {
   // Calculate indicator position based on active tab
   const indicatorPosition = tabIndicatorAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, width / 2]
+    outputRange: [0, width / 2],
   });
 
   // Sensor Data Chart Component
@@ -193,8 +197,18 @@ export default function MonitorScreen() {
             <LineChart
               data={{
                 labels: [
-                  "60p", "55p", "50p", "45p", "40p", "35p",
-                  "30p", "25p", "20p", "15p", "10p", "5p",
+                  "60p",
+                  "55p",
+                  "50p",
+                  "45p",
+                  "40p",
+                  "35p",
+                  "30p",
+                  "25p",
+                  "20p",
+                  "15p",
+                  "10p",
+                  "5p",
                 ],
                 datasets: [
                   {
@@ -255,15 +269,13 @@ export default function MonitorScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#f2f6fc" }}>
-      <StatusBar backgroundColor="#f2f6fc" />
-      <View style={{ flexDirection: "column", paddingTop: height * 0.06, height: height, backgroundColor: '#f2f6fc' }}>
-        <View style={styles.titleContainer}>
-          <View style={styles.title}>
-            <Octicons name="gear" size={30} color="black" />
-            <ThemedText type="title" style={{ fontSize: 25 }}> Data Overview</ThemedText>
-          </View>
-        </View>
-
+      <View
+        style={{
+          flexDirection: "column",
+          height: height,
+          alignItems: "center",
+        }}
+      >
         {/* Tab Navigation */}
         <View style={styles.tabContainer}>
           <TouchableOpacity
@@ -271,10 +283,12 @@ export default function MonitorScreen() {
             onPress={() => switchTab(0)}
             activeOpacity={0.7}
           >
-            <Text style={[
-              styles.tabButtonText,
-              activeTab === 0 && styles.activeTabText
-            ]}>
+            <Text
+              style={[
+                styles.tabButtonText,
+                activeTab === 0 && styles.activeTabText,
+              ]}
+            >
               Sensor Charts
             </Text>
           </TouchableOpacity>
@@ -284,10 +298,12 @@ export default function MonitorScreen() {
             onPress={() => switchTab(1)}
             activeOpacity={0.7}
           >
-            <Text style={[
-              styles.tabButtonText,
-              activeTab === 1 && styles.activeTabText
-            ]}>
+            <Text
+              style={[
+                styles.tabButtonText,
+                activeTab === 1 && styles.activeTabText,
+              ]}
+            >
               Activity Log
             </Text>
           </TouchableOpacity>
@@ -296,11 +312,10 @@ export default function MonitorScreen() {
           <Animated.View
             style={[
               styles.tabIndicator,
-              { transform: [{ translateX: indicatorPosition }] }
+              { transform: [{ translateX: indicatorPosition }] },
             ]}
           />
         </View>
-
         {/* Content Area */}
         <View style={styles.contentWrapper}>
           {isLoading ? (
@@ -308,8 +323,12 @@ export default function MonitorScreen() {
               <ActivityIndicator size="large" color="#2666de" />
               <Text style={styles.loadingText}>Loading...</Text>
             </View>
+          ) : activeTab === 0 ? (
+            DataChartComponent
           ) : (
-            activeTab === 0 ? DataChartComponent : <ActivityLogScreen />
+            <View style={styles.activityLogContainer}>
+              <ActivityLogScreen />
+            </View>
           )}
         </View>
       </View>
@@ -319,62 +338,72 @@ export default function MonitorScreen() {
 
 const styles = StyleSheet.create({
   titleContainer: {
-    height: height * 0.06,
+    backgroundColor: "#f2f6fc",
+    height: height * 0.12,
+    flexDirection: "column",
     alignItems: "center",
     gap: 50,
-    marginBottom: 10,
+    marginBottom: 5,
   },
   title: {
-    flexDirection: 'row',
+    flexDirection: "row",
+    backgroundColor: "#ffff",
+    width: width,
+    height: height * 0.1,
+    justifyContent: "center",
+    paddingTop: 25,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
   },
   tabContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     height: 50,
-    backgroundColor: '#f2f6fc',
+    backgroundColor: "#f2f6fc",
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    borderBottomColor: "#ccc",
   },
   tabButton: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   tabButtonText: {
     fontSize: 16,
-    color: '#6c757d',
+    color: "#6c757d",
   },
   activeTabText: {
-    color: '#2666de',
-    fontWeight: 'bold',
+    color: "#2666de",
+    fontWeight: "bold",
   },
   tabIndicator: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     width: width / 2,
     height: 4,
-    backgroundColor: '#2666de',
+    backgroundColor: "#2666de",
   },
   contentWrapper: {
     flex: 1,
-    backgroundColor: '#f2f6fc',
+    backgroundColor: "#f2f6fc",
+    width: "100%",
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   loadingText: {
     marginTop: 10,
     fontSize: 16,
-    color: '#6c757d',
+    color: "#6c757d",
   },
   contentContainer: {
     flex: 1,
   },
   dataChart: {
-    backgroundColor: '#f2f6fc',
+    backgroundColor: "#f2f6fc",
   },
   chartContainer: {
     marginBottom: 20,
@@ -391,5 +420,10 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignSelf: "center",
     marginRight: 10,
+  },
+  activityLogContainer: {
+    flex: 1,
+    width: "100%",
+    backgroundColor: "#f2f6fc",
   },
 });
