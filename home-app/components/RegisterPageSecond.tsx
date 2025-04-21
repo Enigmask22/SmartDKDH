@@ -7,21 +7,24 @@ import { Dimensions } from "react-native";
 import { PropsWithChildren } from "react";
 const { width, height } = Dimensions.get("window");
 
-const RegisterPageSecond = ({
-  children,
+interface RegisterPageSecondProps {
+  usernameAdafruit: string;
+  setUsernameAdafruit: React.Dispatch<React.SetStateAction<string>>;
+  keyAdafruit: string;
+  setKeyAdafruit: React.Dispatch<React.SetStateAction<string>>;
+  handleSignUp: () => void;
+  togglePage: () => void;
+  disabled?: boolean;
+}
+
+const RegisterPageSecond: React.FC<RegisterPageSecondProps> = ({
   usernameAdafruit,
   setUsernameAdafruit,
   keyAdafruit,
   setKeyAdafruit,
   handleSignUp,
   togglePage,
-}: PropsWithChildren & {
-  usernameAdafruit: string;
-  setUsernameAdafruit: (usernameAdafruit: string) => void;
-  keyAdafruit: string;
-  setKeyAdafruit: (keyAdafruit: string) => void;
-  handleSignUp: () => void; // Hàm điều hướng về trang đăng nhập
-  togglePage: () => void; // Hàm điều hướng đến trang tiếp theo
+  disabled = false,
 }) => {
   return (
     <View>
@@ -38,7 +41,7 @@ const RegisterPageSecond = ({
 
       {/* Sign up Box*/}
       <View style={styles.buttonLoginBox}>
-        <ButtonAuth title="Sign up" onPress={handleSignUp} />
+        <ButtonAuth title="Create Account" onPress={handleSignUp} />
       </View>
 
       <View>
