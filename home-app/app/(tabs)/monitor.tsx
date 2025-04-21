@@ -401,6 +401,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
+    marginBottom: height * 0.12,
   },
   dataChart: {
     backgroundColor: "#f2f6fc",

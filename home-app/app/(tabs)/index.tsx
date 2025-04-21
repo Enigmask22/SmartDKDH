@@ -13,8 +13,6 @@ import {
   ActivityIndicator,
   Animated,
   Easing,
-  SafeAreaView,
-
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { HelloWave } from "@/components/HelloWave";
@@ -30,6 +28,7 @@ import { Sensor } from "@/components/Sensor";
 import { Devices } from "@/components/Devices";
 
 import { router } from "expo-router";
+import React from "react";
 
 const { width, height } = Dimensions.get("window");
 // API configuration
@@ -72,15 +71,14 @@ const LoadingSkeleton = () => {
 };
 
 // Error component with retry button
-const ErrorView = ({ onRetry }: {
-  onRetry: () => void;
-}) => {
+const ErrorView = ({ onRetry }: { onRetry: () => void }) => {
   return (
     <View style={styles.errorContainer}>
       <MaterialIcons name="error-outline" size={70} color="#f44336" />
       <Text style={styles.errorTitle}>Connection Error</Text>
       <Text style={styles.errorMessage}>
-        Unable to connect to the server. Please check your internet connection and try again.
+        Unable to connect to the server. Please check your internet connection
+        and try again.
       </Text>
       <TouchableOpacity style={styles.retryButton} onPress={onRetry}>
         <Text style={styles.retryButtonText}>Try Again</Text>
@@ -96,7 +94,9 @@ export default function HomeScreen() {
   const [fanDevices, setFanDevices] = useState<string[]>([]);
   const [fanStatuses, setFanStatuses] = useState<Record<string, string>>({});
   const [fanValues, setFanValues] = useState<Record<string, number>>({});
-  const [deviceDescriptions, setDeviceDescriptions] = useState<Record<string, string>>({});
+  const [deviceDescriptions, setDeviceDescriptions] = useState<
+    Record<string, string>
+  >({});
   const [connectionStatus, setConnectionStatus] = useState("Connecting...");
   const [serverIp, setServerIp] = useState(
     API_BASE_URL.replace("http://", "").replace(":8000", "")
@@ -305,40 +305,17 @@ export default function HomeScreen() {
 
   return (
     <>
-      <StatusBar backgroundColor={'#f2f6fc'} />
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f6fc", paddingTop: 50 }}
-    >
       <View
         style={{
           backgroundColor: "#f2f6fc",
           height: height,
           alignItems: "center",
+          paddingTop: 50,
         }}
       >
-        <View style={styles.titleContainer}>
-          <View style={styles.title}>
-            <Feather name="home" size={30} color="black" />
-            <Text style={{ fontSize: 25, fontFamily: "Poppins-SemiBold" }}>
-              {" "}
-              Home
-            </Text>
-          </View>
-        </View>
-
         {renderContent()}
       </View>
     </>
-        <Info device={getRunningDeviceNumber()} online={userNo != null} />
-        <Sensor />
-        <Devices
-          runningFan={getRunningFanNumber()}
-          availFan={fanDevices.length}
-          runningLed={getRunningLedNumber()}
-          availLed={ledDevices.length}
-        />
-      </View>
-    </SafeAreaView>
   );
 }
 
@@ -348,20 +325,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#f2f6fc",
     height: height * 0.12,
     flexDirection: "column",
+    paddingTop: 30,
     alignItems: "center",
     gap: 50,
     marginBottom: 5,
   },
   title: {
     flexDirection: "row",
-    backgroundColor: "#ffff",
-    width: width,
-    height: height * 0.1,
-    // alignItems: "center",
-    justifyContent: "center",
-    paddingTop: 25,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
   },
   titleBox: {
     flexDirection: "row",
@@ -370,40 +340,40 @@ const styles = StyleSheet.create({
 
   // Loading skeleton styles
   loadingContainer: {
-    width: '90%',
+    width: "90%",
     alignItems: "center",
     justifyContent: "center",
   },
   loadingInfo: {
-    width: '100%',
+    width: "100%",
     height: 100,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: "#E0E0E0",
     borderRadius: 15,
     marginBottom: 20,
   },
   loadingSensor: {
-    width: '100%',
+    width: "100%",
     height: 150,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: "#E0E0E0",
     borderRadius: 15,
     marginBottom: 20,
   },
   loadingDevices: {
-    width: '100%',
+    width: "100%",
     height: 180,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: "#E0E0E0",
     borderRadius: 15,
   },
 
   // Error styles
   errorContainer: {
-    width: '85%',
-    backgroundColor: 'white',
+    width: "85%",
+    backgroundColor: "white",
     borderRadius: 15,
     padding: 25,
     marginTop: 40,
-    alignItems: 'center',
-    shadowColor: '#000',
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -414,33 +384,33 @@ const styles = StyleSheet.create({
   },
   errorTitle: {
     fontSize: 22,
-    fontFamily: 'Poppins-Bold',
-    color: '#f44336',
+    fontFamily: "Poppins-Bold",
+    color: "#f44336",
     marginTop: 15,
     marginBottom: 10,
   },
   errorMessage: {
     fontSize: 16,
-    fontFamily: 'Poppins-Regular',
-    color: '#666',
-    textAlign: 'center',
+    fontFamily: "Poppins-Regular",
+    color: "#666",
+    textAlign: "center",
     marginBottom: 25,
   },
   retryButton: {
-    backgroundColor: '#3674B5',
+    backgroundColor: "#3674B5",
     paddingHorizontal: 30,
     paddingVertical: 12,
     borderRadius: 30,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 1.5,
   },
   retryButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontFamily: 'Poppins-Medium',
+    fontFamily: "Poppins-Medium",
   },
 
   // Other existing styles...

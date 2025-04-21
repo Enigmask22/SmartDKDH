@@ -32,6 +32,7 @@ import { handleForAll } from "@/actions/light/handleVoiceCommand";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { ThemedText } from "@/components/ThemedText";
 import { Feather } from "@expo/vector-icons";
+import React from "react";
 const { width, height } = Dimensions.get("window");
 
 const API_BASE_URL = "https://smartdkdh.onrender.com";
@@ -55,21 +56,16 @@ const SkeletonCard = () => {
         }),
       ])
     );
-    
+
     animation.start();
-    
+
     return () => {
       animation.stop();
     };
   }, []);
 
   return (
-    <Animated.View 
-      style={[
-        styles.skeletonCardContainer, 
-        { opacity }
-      ]}
-    >
+    <Animated.View style={[styles.skeletonCardContainer, { opacity }]}>
       <View style={styles.skeletonIcon} />
       <View style={styles.skeletonTitle} />
       <View style={styles.skeletonSwitch} />
@@ -96,21 +92,16 @@ const SkeletonSummary = () => {
         }),
       ])
     );
-    
+
     animation.start();
-    
+
     return () => {
       animation.stop();
     };
   }, []);
 
   return (
-    <Animated.View 
-      style={[
-        styles.skeletonSummaryContainer, 
-        { opacity }
-      ]}
-    >
+    <Animated.View style={[styles.skeletonSummaryContainer, { opacity }]}>
       <View style={styles.skeletonSummaryItem} />
       <View style={styles.skeletonSummaryItem} />
       <View style={styles.skeletonSummaryItem} />
@@ -119,16 +110,21 @@ const SkeletonSummary = () => {
 };
 
 // Error state component
-const ErrorState = ({ message, onRetry } : {
-  message?: string; 
+const ErrorState = ({
+  message,
+  onRetry,
+}: {
+  message?: string;
   onRetry: () => void;
 }) => {
   return (
     <View style={styles.errorContainer}>
       <Feather name="wifi-off" size={64} color="#f44336" />
       <Text style={styles.errorTitle}>Connection Error</Text>
-      <Text style={styles.errorMessage}>{message || "Unable to load lights data"}</Text>
-      <TouchableOpacity 
+      <Text style={styles.errorMessage}>
+        {message || "Unable to load lights data"}
+      </Text>
+      <TouchableOpacity
         style={styles.retryButton}
         onPress={onRetry}
         activeOpacity={0.7}
@@ -155,9 +151,11 @@ export default function LightList() {
     (state: RootState) => state.ledDevices
   );
   const sensor = useSelector((state: RootState) => state.sensor);
-  
+
   // Calculate only if devices are loaded
-  const onBulbs = loading ? 0 : devices.filter((bulb) => bulb.status === "1").length;
+  const onBulbs = loading
+    ? 0
+    : devices.filter((bulb) => bulb.status === "1").length;
   const offBulbs = loading ? 0 : devices.length - onBulbs;
 
   // Retry fetching function
@@ -453,11 +451,9 @@ export default function LightList() {
           </View>
         </View>
       </View>
-      
       {/* Render dynamic content */}
-      {renderContent()}
-      </View> */}
-      <SummaryCard
+      <View>{renderContent()}</View>
+      {/* <SummaryCard
         type="bulb"
         total={devices.length}
         on={onBulbs}
@@ -480,7 +476,7 @@ export default function LightList() {
             />
           </DeviceCard>
         ))}
-      </View>
+      </View> */}
       <View style={styles.footer}>
         <TouchableOpacity
           style={[
@@ -535,8 +531,10 @@ export default function LightList() {
         </View>
       </View>
       <VoiceHint>
-        {loading ? "Đang tải dữ liệu..." 
-          : error ? "Không thể kết nối đến thiết bị. Vui lòng thử lại." 
+        {loading
+          ? "Đang tải dữ liệu..."
+          : error
+          ? "Không thể kết nối đến thiết bị. Vui lòng thử lại."
           : autoMode
           ? "Chế độ tự động: LED sẽ điều chỉnh theo ánh sáng"
           : 'Thử nói: "Bật đèn phòng khách", "Tắt đèn số 1" hoặc "Tắt tất cả đèn"'}

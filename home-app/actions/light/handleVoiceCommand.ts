@@ -42,7 +42,10 @@ export const handleForAll = (
   }
 
   // Now we can safely use status since it's definitely assigned
-  if (normalizedCommand.includes("het")) {
+  if (
+    normalizedCommand.includes("het") ||
+    normalizedCommand.includes("tat ca")
+  ) {
     for (const device of devices) {
       const deviceId = device.id;
       dispatch(toggleLed({ id: deviceId, newStatus: status }));

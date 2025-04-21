@@ -32,10 +32,10 @@ import { styles } from "@/styles/fan";
 import { VoiceHint } from "@/components/ui/VoiceHint";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { ThemedText } from "@/components/ThemedText";
+import React from "react";
 const { width, height } = Dimensions.get("window");
 
 const API_BASE_URL = `https://smartdkdh.onrender.com`;
-
 
 const SkeletonCard = () => {
   // Create Skeleton Component for Cards
@@ -65,12 +65,7 @@ const SkeletonCard = () => {
   }, []);
 
   return (
-    <Animated.View
-      style={[
-        styles.skeletonCardContainer,
-        { opacity }
-      ]}
-    >
+    <Animated.View style={[styles.skeletonCardContainer, { opacity }]}>
       <View style={styles.skeletonIcon} />
       <View style={styles.skeletonTitle} />
       <View style={styles.skeletonSlider} />
@@ -106,12 +101,7 @@ const SkeletonSummary = () => {
   }, []);
 
   return (
-    <Animated.View
-      style={[
-        styles.skeletonSummaryContainer,
-        { opacity }
-      ]}
-    >
+    <Animated.View style={[styles.skeletonSummaryContainer, { opacity }]}>
       <View style={styles.skeletonSummaryItem} />
       <View style={styles.skeletonSummaryItem} />
       <View style={styles.skeletonSummaryItem} />
@@ -120,7 +110,10 @@ const SkeletonSummary = () => {
 };
 
 // Add ErrorState component
-const ErrorState = ({ message, onRetry }: {
+const ErrorState = ({
+  message,
+  onRetry,
+}: {
   message?: string;
   onRetry: () => void;
 }) => {
@@ -128,7 +121,9 @@ const ErrorState = ({ message, onRetry }: {
     <View style={styles.errorContainer}>
       <Feather size={64} color="#f44336" />
       <Text style={styles.errorTitle}>Connection Error</Text>
-      <Text style={styles.errorMessage}>{message || "Unable to load fan data"}</Text>
+      <Text style={styles.errorMessage}>
+        {message || "Unable to load fan data"}
+      </Text>
       <TouchableOpacity
         style={styles.retryButton}
         onPress={onRetry}
@@ -378,70 +373,59 @@ export default function FanList() {
 
   return (
     <ScrollView style={styles.container}>
-      <StatusBar backgroundColor="#f2f6fc" />
-      <View style={styles.titleContainer}>
-        <View style={{ flexDirection: 'row', width: width }}>
-      {/* <View style={styles.titleContainer}>
-        <View style={{flexDirection:'row', width:width}}>
-          <View style={styles.backButton}></View>
-          <View style={styles.title}>
-            <ThemedText type="title" style={{ fontSize: 25 }}> Smart Fan</ThemedText>
-          </View>
-          <View style={styles.backButton}>
-            <TouchableOpacity onPress={() => router.back()}>
-              <Ionicons name="chevron-forward" size={24} color="black" />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-
-      {/* Render content based on loading and error states */}
-      {loading ? (
-        <>
-          <SkeletonSummary />
-          <View style={styles.skeletonGrid}>
-            {[1, 2, 3, 4].map((item) => (
-              <SkeletonCard key={`skeleton-${item}`} />
-            ))}
-          </View>
-        </>
-      ) : error ? (
-        <ErrorState
-          message={typeof error === 'string' ? error : "Could not connect to fan devices"}
-          onRetry={handleRetry}
-        />
-      ) : (
-        <>
-          <SummaryCard
-            total={devices.length}
-            on={onFans}
-            off={offFans}
-            type="fan"
+      <View>
+        {loading ? (
+          <>
+            <SkeletonSummary />
+            <View style={styles.skeletonGrid}>
+              {[1, 2, 3, 4].map((item) => (
+                <SkeletonCard key={`skeleton-${item}`} />
+              ))}
+            </View>
+          </>
+        ) : error ? (
+          <ErrorState
+            message={
+              typeof error === "string"
+                ? error
+                : "Could not connect to fan devices"
+            }
+            onRetry={handleRetry}
           />
-          <View style={styles.fansGrid}>
-            {devices.map((fan) => (
-              <DeviceCard
-                key={fan.id}
-                device={{
-                  type: "fan",
-                  ...fan,
-                }}
-              >
-                <TouchableOpacity>
-                  <Ionicons
-                    name="settings-outline"
-                    size={20}
-                    color="#777"
-                    onPress={() => router.push(`/(list)/fanDetails?id=${fan.id}`)}
-                  />
-                </TouchableOpacity>
-              </DeviceCard>
-            ))}
-          </View>
-        </>
-      )}
-      </View> */}
-      <SummaryCard
+        ) : (
+          <>
+            <SummaryCard
+              total={devices.length}
+              on={onFans}
+              off={offFans}
+              type="fan"
+            />
+            <View style={styles.fansGrid}>
+              {devices.map((fan) => (
+                <DeviceCard
+                  key={fan.id}
+                  device={{
+                    type: "fan",
+                    ...fan,
+                  }}
+                >
+                  <TouchableOpacity>
+                    <Ionicons
+                      name="settings-outline"
+                      size={20}
+                      color="#777"
+                      onPress={() =>
+                        router.push(`/(list)/fanDetails?id=${fan.id}`)
+                      }
+                    />
+                  </TouchableOpacity>
+                </DeviceCard>
+              ))}
+            </View>
+          </>
+        )}
+      </View>
+      {/* <SummaryCard
         total={devices.length}
         on={onFans}
         off={offFans}
@@ -466,7 +450,7 @@ export default function FanList() {
             </TouchableOpacity>
           </DeviceCard>
         ))}
-      </View>
+      </View> */}
       <View style={styles.footer}>
         <TouchableOpacity
           style={[
@@ -522,10 +506,10 @@ export default function FanList() {
         {loading
           ? "Đang tải dữ liệu..."
           : error
-            ? "Không thể kết nối đến thiết bị quạt. Vui lòng thử lại."
-            : autoMode
-              ? "Chế độ tự động: Fan sẽ điều chỉnh theo nhiệt độ"
-              : 'Thử nói: "Bật quạt phòng khách", "Tắt quạt số 1" hoặc "Tắt tất cả quạt"'}
+          ? "Không thể kết nối đến thiết bị quạt. Vui lòng thử lại."
+          : autoMode
+          ? "Chế độ tự động: Fan sẽ điều chỉnh theo nhiệt độ"
+          : 'Thử nói: "Bật quạt phòng khách", "Tắt quạt số 1" hoặc "Tắt tất cả quạt"'}
       </VoiceHint>
     </ScrollView>
   );
