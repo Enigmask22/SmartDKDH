@@ -381,6 +381,8 @@ export default function FanList() {
       <StatusBar backgroundColor="#f2f6fc" />
       <View style={styles.titleContainer}>
         <View style={{ flexDirection: 'row', width: width }}>
+      {/* <View style={styles.titleContainer}>
+        <View style={{flexDirection:'row', width:width}}>
           <View style={styles.backButton}></View>
           <View style={styles.title}>
             <ThemedText type="title" style={{ fontSize: 25 }}> Smart Fan</ThemedText>
@@ -438,7 +440,33 @@ export default function FanList() {
           </View>
         </>
       )}
-
+      </View> */}
+      <SummaryCard
+        total={devices.length}
+        on={onFans}
+        off={offFans}
+        type="fan"
+      />
+      <View style={styles.fansGrid}>
+        {devices.map((fan) => (
+          <DeviceCard
+            key={fan.id}
+            device={{
+              type: "fan",
+              ...fan,
+            }}
+          >
+            <TouchableOpacity>
+              <Ionicons
+                name="settings-outline"
+                size={20}
+                color="#777"
+                onPress={() => router.push(`/(list)/fanDetails?id=${fan.id}`)}
+              />
+            </TouchableOpacity>
+          </DeviceCard>
+        ))}
+      </View>
       <View style={styles.footer}>
         <TouchableOpacity
           style={[
