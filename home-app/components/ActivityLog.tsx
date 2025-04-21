@@ -178,7 +178,9 @@ export const ActivityLogScreen = () => {
 
   return (
     <View style={styles.safeArea}>
-      <ScrollView style={{ height: "auto", width: "100%" }}>
+      <ScrollView
+        style={{ height: "auto", width: "100%", marginBottom: height * 0.12 }}
+      >
         {/* Hiển thị loading ban đầu khi đang lấy user_no hoặc fetch lần đầu */}
         {isLoading && !refreshing ? (
           <View style={styles.loadingContainer}>
