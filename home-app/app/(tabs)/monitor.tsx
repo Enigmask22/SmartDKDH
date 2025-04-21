@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   TouchableOpacity,
@@ -6,24 +6,22 @@ import {
   Alert,
   View,
   Dimensions,
-  Text
+  Text,
+  Animated,
+  ActivityIndicator
 } from "react-native";
 import Constants from "expo-constants";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { LineChart } from "react-native-chart-kit";
 import { ActivityLogScreen } from "@/components/ActivityLog";
-import ToggleDropdown from "@/components/Dropdown";
 import { StatusBar } from "expo-status-bar";
 import { Sensor } from "@/components/Sensor";
 import { MaterialIcons, Octicons } from "@expo/vector-icons";
 const { width, height } = Dimensions.get("window");
 
 // API configuration
-// const API_BASE_URL = `http://${Constants.expoConfig?.extra?.serverIp}:${Constants.expoConfig?.extra?.apiPort}`;
 const API_BASE_URL = `https://smartdkdh.onrender.com`;
 
 const screenWidth = Dimensions.get("window").width;
@@ -32,19 +30,21 @@ export default function MonitorScreen() {
   const colorScheme = useColorScheme();
   const [sensorDevices, setSensorDevices] = useState<string[]>([]);
   const [sensorValues, setSensorValues] = useState<Record<string, string>>({});
-  const [deviceDescriptions, setDeviceDescriptions] = useState<
-    Record<string, string>
-  >({});
+  const [deviceDescriptions, setDeviceDescriptions] = useState<Record<string, string>>({});
   const [deviceUnits, setDeviceUnits] = useState<Record<string, string>>({});
   const [connectionStatus, setConnectionStatus] = useState("Connecting...");
-  const [serverIp, setServerIp] = useState(
-    API_BASE_URL.replace("http://", "").replace(":8000", "")
-  );
-  const [dropdown, setDropDown] = useState<boolean[]>([true, false])
+  const [serverIp, setServerIp] = useState(API_BASE_URL.replace("http://", "").replace(":8000", ""));
 
-  // Lưu trữ dữ liệu lịch sử cho biểu đồ - tăng số lượng điểm dữ liệu
+  // Replace dropdown state with activeTab state
+  const [activeTab, setActiveTab] = useState(0); // 0 = Chart, 1 = Activity Log
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Animated values for the tab indicator
+  const tabIndicatorAnim = useRef(new Animated.Value(0)).current;
+
+  // Lưu trữ dữ liệu lịch sử cho biểu đồ
   const [historyData, setHistoryData] = useState<Record<string, number[]>>({
-    "dadn-temp": Array(12).fill(0), // 12 điểm dữ liệu cho 1 giờ (mỗi 5 phút)
+    "dadn-temp": Array(12).fill(0),
     "dadn-light": Array(12).fill(0),
     "dadn-humi": Array(12).fill(0),
   });
@@ -56,7 +56,6 @@ export default function MonitorScreen() {
 
   // WebSocket connection
   useEffect(() => {
-    // const wsUrl = `ws://${serverIp}:8000/ws`;
     const wsUrl = `wss://smartdkdh.onrender.com/ws`;
     const ws = new WebSocket(wsUrl);
 
@@ -68,7 +67,6 @@ export default function MonitorScreen() {
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        //console.log("Received sensor data:", data);
         if (data.sensor_values) {
           setSensorValues(data.sensor_values);
 
@@ -111,7 +109,6 @@ export default function MonitorScreen() {
 
   const fetchDevices = async () => {
     try {
-      // const response = await fetch(`http://${serverIp}:8000/sensor-devices`);
       const response = await fetch(`${API_BASE_URL}/sensor-devices`);
       const data = await response.json();
       const devices = data.devices;
@@ -157,24 +154,38 @@ export default function MonitorScreen() {
     return colors[sensorId] || "#4CAF50";
   };
 
-  const chartTriggerComponent = (
-    <View style={styles.triggerContent}>
-      <Text style={styles.triggerText}>Sensor Data Chart</Text>
-      <Text style={styles.triggerIcon}>{!dropdown[0] ? <MaterialIcons name="navigate-next" size={24} color="black" /> : <MaterialIcons name="keyboard-arrow-down" size={24} color="black" />}</Text>
-    </View>
-  );
-  
-  const logTriggerComponent = (
-    <View style={styles.triggerContent}>
-      <Text style={styles.triggerText}>Activity Log</Text>
-      <Text style={styles.triggerIcon}>{!dropdown[1] ? <MaterialIcons name="navigate-next" size={24} color="black" /> : <MaterialIcons name="keyboard-arrow-down" size={24} color="black" />}</Text>
-    </View>
-  );
+  // Tab switching function with loading state
+  const switchTab = (index: number) => {
+    if (index === activeTab) return;
 
-  const DataChart = (
-    <ThemedView style={styles.dataChart}>
-      <Sensor/>
-      {sensorDevices.map((deviceId) => (
+    setIsLoading(true);
+
+    // Animate the tab indicator
+    Animated.timing(tabIndicatorAnim, {
+      toValue: index,
+      duration: 250,
+      useNativeDriver: false,
+    }).start();
+
+    // Simulate data loading with a small delay
+    setTimeout(() => {
+      setActiveTab(index);
+      setIsLoading(false);
+    }, 300);
+  };
+
+  // Calculate indicator position based on active tab
+  const indicatorPosition = tabIndicatorAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, width / 2]
+  });
+
+  // Sensor Data Chart Component
+  const DataChartComponent = (
+    <ScrollView style={styles.contentContainer}>
+      <ThemedView style={styles.dataChart}>
+        <Sensor />
+        {sensorDevices.map((deviceId) => (
           <ThemedView key={`chart-${deviceId}`} style={styles.chartContainer}>
             <ThemedText type="defaultSemiBold">
               {deviceDescriptions[deviceId]}
@@ -182,19 +193,9 @@ export default function MonitorScreen() {
             <LineChart
               data={{
                 labels: [
-                  "60p",
-                  "55p",
-                  "50p",
-                  "45p",
-                  "40p",
-                  "35p",
-                  "30p",
-                  "25p",
-                  "20p",
-                  "15p",
-                  "10p",
-                  "5p",
-                ], // Nhãn cho 1 giờ
+                  "60p", "55p", "50p", "45p", "40p", "35p",
+                  "30p", "25p", "20p", "15p", "10p", "5p",
+                ],
                 datasets: [
                   {
                     data: historyData[deviceId] || Array(12).fill(0),
@@ -247,38 +248,72 @@ export default function MonitorScreen() {
               withShadow={false}
             />
           </ThemedView>
-      ))}
-    </ThemedView>
-  )
+        ))}
+      </ThemedView>
+    </ScrollView>
+  );
 
   return (
-    <>
-      <StatusBar backgroundColor="#f2f6fc"/>
-      <View style={{flexDirection:"column", paddingTop:height*0.06, height:height*0.86, backgroundColor:'#f2f6fc'}}>
-      <View style={styles.titleContainer}>
-        <View style={styles.title}>
-          <Octicons name="gear" size={30} color="black" />
-          <ThemedText type="title" style={{fontSize:25}}> Data Overview</ThemedText>
+    <View style={{ flex: 1, backgroundColor: "#f2f6fc" }}>
+      <StatusBar backgroundColor="#f2f6fc" />
+      <View style={{ flexDirection: "column", paddingTop: height * 0.06, height: height, backgroundColor: '#f2f6fc' }}>
+        <View style={styles.titleContainer}>
+          <View style={styles.title}>
+            <Octicons name="gear" size={30} color="black" />
+            <ThemedText type="title" style={{ fontSize: 25 }}> Data Overview</ThemedText>
+          </View>
+        </View>
+
+        {/* Tab Navigation */}
+        <View style={styles.tabContainer}>
+          <TouchableOpacity
+            style={styles.tabButton}
+            onPress={() => switchTab(0)}
+            activeOpacity={0.7}
+          >
+            <Text style={[
+              styles.tabButtonText,
+              activeTab === 0 && styles.activeTabText
+            ]}>
+              Sensor Charts
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.tabButton}
+            onPress={() => switchTab(1)}
+            activeOpacity={0.7}
+          >
+            <Text style={[
+              styles.tabButtonText,
+              activeTab === 1 && styles.activeTabText
+            ]}>
+              Activity Log
+            </Text>
+          </TouchableOpacity>
+
+          {/* Animated Tab Indicator */}
+          <Animated.View
+            style={[
+              styles.tabIndicator,
+              { transform: [{ translateX: indicatorPosition }] }
+            ]}
+          />
+        </View>
+
+        {/* Content Area */}
+        <View style={styles.contentWrapper}>
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#2666de" />
+              <Text style={styles.loadingText}>Loading...</Text>
+            </View>
+          ) : (
+            activeTab === 0 ? DataChartComponent : <ActivityLogScreen />
+          )}
         </View>
       </View>
-        <View style={{height:height*0.7}}>
-        <ToggleDropdown 
-          id="chart"
-          state={dropdown[0]}
-          stateChange={setDropDown}
-          triggerComponent={chartTriggerComponent}
-          dropdownContent={DataChart}
-        />
-        <ToggleDropdown 
-          id="activity"
-          state={dropdown[1]}
-          stateChange={setDropDown}
-          triggerComponent={logTriggerComponent}
-          dropdownContent={<ActivityLogScreen/>}
-        />
-        </View>
-      </View>
-    </>
+    </View>
   );
 }
 
@@ -286,38 +321,60 @@ const styles = StyleSheet.create({
   titleContainer: {
     height: height * 0.06,
     alignItems: "center",
-    gap: 50
+    gap: 50,
+    marginBottom: 10,
   },
   title: {
     flexDirection: 'row',
   },
-  dataChart: {
+  tabContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    height: 50,
+    backgroundColor: '#f2f6fc',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  tabButton: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tabButtonText: {
+    fontSize: 16,
+    color: '#6c757d',
+  },
+  activeTabText: {
+    color: '#2666de',
+    fontWeight: 'bold',
+  },
+  tabIndicator: {
+    position: 'absolute',
+    bottom: 0,
+    width: width / 2,
+    height: 4,
+    backgroundColor: '#2666de',
+  },
+  contentWrapper: {
+    flex: 1,
     backgroundColor: '#f2f6fc',
   },
-  sensorIconContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 16,
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  sensorIcon: {
-    fontSize: 24,
-    color: "#fff",
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#6c757d',
   },
-  sensorInfo: {
+  contentContainer: {
     flex: 1,
   },
-  sensorValue: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginTop: 4,
-  },
-  chartTitle: {
-    marginTop: 16,
-    marginBottom: 12,
-    fontSize: 18,
+  dataChart: {
+    backgroundColor: '#f2f6fc',
   },
   chartContainer: {
     marginBottom: 20,
@@ -334,27 +391,5 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignSelf: "center",
     marginRight: 10,
-  },
-  triggerContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 8,
-  },
-  triggerText: {
-    fontSize: 20,
-    fontFamily:'Poppins-Bold',
-    color: '#2666de',
-  },
-  untriggerIcon: {
-    fontSize: 30,
-    color: '#6c757d',
-  },
-  triggerIcon: {
-    fontSize: 30,
-    color: '#6c757d',
-  },
-  dropdownsContainer: {
-
   },
 });

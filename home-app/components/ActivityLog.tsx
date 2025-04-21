@@ -217,6 +217,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: "#f8f9fa",
+    paddingTop: Platform.OS === "android" ? Constants.statusBarHeight : 0,
   },
   header: {
     paddingHorizontal: 16,
