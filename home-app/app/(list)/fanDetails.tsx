@@ -35,7 +35,7 @@ const API_BASE_URL = `https://smartdkdh.onrender.com`;
 
 // Các tùy chọn thời gian hẹn giờ (phút)
 const TIMER_OPTIONS = [
-  { label: "30 min", value: 30 },
+  { label: "30 min", value: 1 },
   { label: "1 h", value: 60 },
   { label: "2 h", value: 120 },
   { label: "5 h", value: 300 },
@@ -102,6 +102,13 @@ export default function FanDetails() {
       handleToggleFan(fan.id, "off");
       setTimerEnabled(false);
       setTimeRemaining(null);
+
+      // Hiển thị thông báo timer kết thúc bằng Alert thay vì text trực tiếp
+      Alert.alert(
+        "Hẹn giờ kết thúc",
+        "Quạt đã được tắt tự động do hết thời gian hẹn giờ",
+        [{ text: "OK" }]
+      );
     }
 
     return () => {
@@ -110,6 +117,20 @@ export default function FanDetails() {
       }
     };
   }, [timerEnabled, timeRemaining, fan?.value]);
+
+  // Tự động tắt timer khi quạt bị tắt thủ công
+  useEffect(() => {
+    // Nếu timer đang bật, nhưng quạt bị tắt, reset timer
+    if (timerEnabled && fan && fan.value === 0) {
+      setTimerEnabled(false);
+      setTimeRemaining(null);
+
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    }
+  }, [fan?.value, timerEnabled]);
 
   const loadTimerState = async () => {
     try {
@@ -174,7 +195,23 @@ export default function FanDetails() {
   };
 
   const handleTimerSelect = (minutes: number) => {
+    // Nếu đang chọn lại timer đã được chọn và đang hoạt động, reset nó
+    if (selectedTimer === minutes && timerEnabled) {
+      setTimerEnabled(false);
+      setTimeRemaining(null);
+      setSelectedTimer(null);
+
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      return;
+    }
+
+    // Chọn timer mới
     setSelectedTimer(minutes);
+
+    // Nếu timer đang hoạt động, cập nhật thời gian mới
     if (timerEnabled) {
       const seconds = minutes * 60;
       setTimeRemaining(seconds);
@@ -445,7 +482,6 @@ export default function FanDetails() {
           <View style={styles.backButton}></View>
           <View style={styles.title}>
             <ThemedText type="title" style={{ fontSize: 25 }}>
-              {" "}
               Fan {fan.id}
             </ThemedText>
             <Text style={styles.description}>
@@ -463,7 +499,7 @@ export default function FanDetails() {
       <View style={{ position: "relative" }}>
         <LottieView
           source={require("@/animations/fan.json")}
-          style={{ width: "100%", height: height*0.4}}
+          style={{ width: "100%", height: height * 0.4 }}
           autoPlay={fan.value > 0}
           loop={fan.value > 0}
           speed={fan.value > 0 ? fan.value / 50 : 0}
@@ -528,10 +564,9 @@ export default function FanDetails() {
             minimumTrackTintColor="#2666de"
             maximumTrackTintColor="#e0e0e0"
             thumbTintColor="#ffffff"
-            
             disabled={autoMode}
           />
-          
+
           <TouchableOpacity
             style={styles.sliderButton}
             onPress={handleIncrease}
@@ -584,11 +619,11 @@ export default function FanDetails() {
               <Switch
                 value={timerEnabled}
                 onValueChange={handleTimerToggle}
-                trackColor={{ false: "#ddd", true: "#4287f5" }}
+                trackColor={{ false: "#ddd", true: "#2666de" }}
                 thumbColor={timerEnabled ? "#fff" : "#fff"}
                 disabled={autoMode || !selectedTimer}
               />
-              {timerEnabled && timeRemaining && (
+              {timerEnabled && timeRemaining !== null && (
                 <Text style={styles.timerCountdown}>
                   {formatTimeRemaining()}
                 </Text>
