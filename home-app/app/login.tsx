@@ -174,7 +174,7 @@ const LoginScreen = () => {
                     style={styles.checkbox}
                   >
                     <Checkbox
-                      status={checked ? "checked" : "unchecked"}
+                      status={!checked ? "checked" : "unchecked"}
                       // onPress={handleCheckboxPress}
                       color="#2C5DBA"
                     />
@@ -214,91 +214,24 @@ const LoginScreen = () => {
   );
 };
 
-// const styles = StyleSheet.create({
-//   safeArea: {
-//     flex: 1,
-//     backgroundColor: "#F2F6FC",
-//   },
-//   container: {
-//     flex: 1,
-//   },
-//   innerContainer: {
-//     flex: 1,
-//     justifyContent: "center",
-//     alignItems: "center",
-//     paddingHorizontal: 30,
-//   },
-//   logo: {
-//     width: 100,
-//     height: 100,
-//     resizeMode: "contain",
-//     marginBottom: 30,
-//   },
-//   title: {
-//     fontSize: 28,
-//     fontWeight: "bold",
-//     color: "#333",
-//     marginBottom: 30,
-//   },
-//   input: {
-//     width: "100%",
-//     height: 50,
-//     borderWidth: 1,
-//     borderColor: "#ddd",
-//     borderRadius: 8,
-//     paddingHorizontal: 15,
-//     marginBottom: 15,
-//     fontSize: 16,
-//     backgroundColor: "#f9f9f9",
-//     color: "#333", // Màu chữ khi nhập
-//   },
-//   button: {
-//     width: "100%",
-//     height: 50,
-//     backgroundColor: "#007AFF", // Màu xanh dương đặc trưng
-//     justifyContent: "center",
-//     alignItems: "center",
-//     borderRadius: 8,
-//     marginTop: 10,
-//     shadowColor: "#000",
-//     shadowOffset: { width: 0, height: 2 },
-//     shadowOpacity: 0.2,
-//     shadowRadius: 3,
-//     elevation: 3,
-//   },
-//   buttonDisabled: {
-//     backgroundColor: "#a0c8ff", // Màu nhạt hơn khi loading
-//   },
-//   buttonText: {
-//     color: "#ffffff",
-//     fontSize: 18,
-//     fontWeight: "bold",
-//   },
-//   errorText: {
-//     color: "red",
-//     marginBottom: 15,
-//     textAlign: "center",
-//   },
-// });
-
 const styles = StyleSheet.create({
   container: {
     height: "auto",
     marginHorizontal: width * 0.06,
-    gap: height*0.15,
-    // backgroundColor: "green",
+    gap: height*0.12,
+    //backgroundColor: "green",
   },
   containerLogo: {
     marginTop: height * 0.1,
-    // backgroundColor: "red",
-    height: height*0.1,
-    paddingVertical: height * 0.02,
+    //backgroundColor: "red",
+    height: height*0.08,
+    paddingVertical: height < 900 ? height*0.015: height * 0.018,
   },
   logoBox: {
     margin: 0,
     padding: 0,
-    // borderColor: "black",
-    // borderWidth: 2,
+    //borderColor: "black",
+    //borderWidth: 2,
   },
   logoText: {
     color: "#3674B5",

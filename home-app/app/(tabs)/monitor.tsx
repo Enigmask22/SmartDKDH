@@ -157,13 +157,6 @@ export default function MonitorScreen() {
     return colors[sensorId] || "#4CAF50";
   };
 
-  const getSensorIcon = (sensorId: string) => {
-    if (sensorId === "dadn-temp") return "🌡️";
-    if (sensorId === "dadn-light") return "💡";
-    if (sensorId === "dadn-humi") return "💧";
-    return "📊";
-  };
-
   const chartTriggerComponent = (
     <View style={styles.triggerContent}>
       <Text style={styles.triggerText}>Sensor Data Chart</Text>
@@ -243,7 +236,7 @@ export default function MonitorScreen() {
               bezier
               style={{
                 ...styles.chart,
-                marginLeft: 20,
+                marginLeft: 10,
               }}
               withInnerLines={false}
               withOuterLines={false}

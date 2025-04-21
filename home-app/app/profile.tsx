@@ -4,7 +4,8 @@ import {
   ScrollView,
   View,
   Dimensions,
-  Pressable
+  Pressable,
+  TouchableOpacity
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ThemedText } from "@/components/ThemedText";
@@ -13,9 +14,9 @@ import {AvatarProfile} from "@/components/Avatar";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import Feather from '@expo/vector-icons/Feather';
 import Octicons from '@expo/vector-icons/Octicons';
-import InputBox from "@/components/Input";
+import {InputBox, InputHiddenBox} from "@/components/Input";
 import { Ionicons } from "@expo/vector-icons";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 
 const { width, height } = Dimensions.get("window");
@@ -26,6 +27,17 @@ export default function ProfileScreen() {
   const colorScheme = useColorScheme();
   const [userNo, setUserNo] = useState<number | null>(null);
   const [userData, setUserData] = useState<Record<string, string>>({});
+
+  const [hidden, setHidden] = useState([true, true, true]); // State to manage password visibility
+
+  function changeHidden(idx: number) {
+    setHidden(hidden.map((e, index) => index == idx ? !e : e)); // Toggle password visibility
+  }
+
+  // const handleChangePassword = (password: string) => {
+  //   setPassword(password); // Update password state
+  // };
+
   useEffect(() => {
     const getUserNo = async () => {
       try {
@@ -74,11 +86,13 @@ export default function ProfileScreen() {
       let email = await AsyncStorage.getItem("user_email");
       let ada = await AsyncStorage.getItem("user_ada");
       let key = await AsyncStorage.getItem("user_key");
+      let password = await AsyncStorage.getItem("user_password");
       setUserData(
         {name: name != null ? name : "",
          email: email != null ? email : "",
          ada: ada != null ? ada : "",
-         key: key != null ? key : ""
+         key: key != null ? key : "",
+         password: password != null ? password : ""
       })
   }
 
@@ -86,14 +100,22 @@ export default function ProfileScreen() {
   }, []);
 
   const PersonalData = {"username": userData.name, "email": userData.email,"password":userData.password}
-  const AdaData =  {"AIO_USERNAME": userData.username_adafruit, "AIO_KEY": userData.key_adafruit}
+  const AdaData =  {"AIO_USERNAME": userData.ada, "AIO_KEY": userData.key}
   return (
     <View style={{backgroundColor:'#ffffff', height: height*1.1}}>
       <StatusBar backgroundColor="#ffffff"/>
       <View style={styles.titleContainer}>
-        <View style={styles.title}>
-        <Feather name="user" size={30} color="black" />
-          <ThemedText type="title" style={{fontSize:25}}> Profile</ThemedText>
+        <View style={{flexDirection:'row', width:width}}>
+          <View style={styles.backButton}></View>
+          <View style={styles.title}>
+            <Feather name="user" size={30} color="black" />
+            <ThemedText type="title" style={{fontSize:25}}> Profile</ThemedText>
+          </View>
+          <View style={styles.backButton}>
+          <TouchableOpacity onPress={() => router.back()}>
+              <Ionicons name="chevron-forward" size={24} color="black"/>
+          </TouchableOpacity>
+          </View>
         </View>
         <AvatarProfile name={userData.name}/>
       </View>
@@ -101,27 +123,14 @@ export default function ProfileScreen() {
         <ThemedView style={styles.optionContainer}>
           <InputBox title={"Username"} data={PersonalData.username} setData={()=>{}}/>
           <InputBox title={"Email"} data={PersonalData.email} setData={()=>{}}/>
-          <InputBox title={"Password"} data={PersonalData.password} setData={()=>{}}/>
+          <InputHiddenBox title={"Password"} data={PersonalData.password} setData={()=>{}}/>
         </ThemedView>
         <View style={styles.line}/>
         <ThemedView style={styles.optionContainer}>
             <ThemedText type="subtitle" style={{paddingBottom: 10}}>More</ThemedText>
-            <InputBox title={"AIO_USERNAME"} data={AdaData.AIO_USERNAME} setData={()=>{}}/>
-            <InputBox title={"AIO_KEY"} data={AdaData.AIO_KEY} setData={()=>{}}/>
+            <InputHiddenBox title={"AIO_USERNAME"} data={AdaData.AIO_USERNAME} setData={()=>{}}/>
+            <InputHiddenBox title={"AIO_KEY"} data={AdaData.AIO_KEY} setData={()=>{}}/>
         </ThemedView>
-        <View style={styles.navigation}>
-        
-          <Pressable onPress={()=>{}} style={styles.editButton}>
-          <Link href={'/profile'}>
-          <Octicons name="pencil" size={24} color="black"/>
-          </Link>
-          </Pressable>
-        <Link href={'/(tabs)/setting'}>
-          <View style={styles.editButton}>
-          <Ionicons name="arrow-back" size={24} color="black" />
-          </View>
-        </Link>
-      </View>
       </ScrollView>
     </View>
   );
@@ -132,17 +141,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     height: height * 0.45,
     flexDirection: "column",
-    padding: 30,
+    padding: 40,
     alignItems: "center",
-    gap: 50,
+    gap: 40,
     marginBottom: 16,
   },
   title: {
-    flexDirection: 'row'
+    flexDirection: 'row',
+    gap: width * 0.01,
+    width: width*0.8,
+    justifyContent:'center'
   },
-  titleBox: {
-    flexDirection: "row",
-    gap: width / 1.5
+  backButton: {
+    width:width*0.1,
   },
   line: {
     backgroundColor:'#f2f6fc',
@@ -156,10 +167,6 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "flex-start",
     paddingLeft: width / 10,
-  },
-  navigation: {
-    gap: 20,
-    flexDirection: 'row'
   },
   editButton: {
     paddingTop:5,

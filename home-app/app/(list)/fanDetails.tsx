@@ -1,3 +1,7 @@
+
+import { View, Text, TouchableOpacity, Platform, StatusBar, Dimensions } from "react-native";
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import Entypo from '@expo/vector-icons/Entypo';
 import { View, Text, TouchableOpacity, Platform, Switch } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Entypo from "@expo/vector-icons/Entypo";
@@ -19,6 +23,8 @@ import PowerButton from "@/components/ui/PowerButton";
 import { VoiceHint } from "@/components/ui/VoiceHint";
 import { setSensorValues } from "@/store/sensorSlice";
 import { setAllValues } from "@/store/fanDevicesSlice";
+import { ThemedText } from "@/components/ThemedText";
+const { width, height } = Dimensions.get("window");
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const API_BASE_URL = `https://smartdkdh.onrender.com`;
@@ -427,6 +433,40 @@ export default function FanDetails() {
     return <FanNotFound />;
   }
   return (
+    <View style={{padding:30, backgroundColor:'#f2f6fc'}}>
+      <StatusBar backgroundColor="#f2f6fc"/>
+      <View style={styles.titleContainer}>
+        <View style={{flexDirection:'row', width:width}}>
+          <View style={styles.backButton}></View>
+          <View style={styles.title}>
+            <ThemedText type="title" style={{fontSize:25}}> Fan {fan.id}</ThemedText>
+            <Text style={styles.description}>{fan.description || "ABC room"}</Text>
+          </View>
+          <View style={styles.backButton}>
+          <TouchableOpacity onPress={() => router.back()}>
+              <Ionicons name="chevron-forward" size={24} color="black"/>
+          </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+      <View style={{
+        position: "relative",
+      }}>
+        <LottieView
+          source={require("@/animations/fan.json")}
+          style={{ width: "100%", height: 400 }}
+          autoPlay={fan.value > 0}
+          loop={fan.value > 0}
+          speed={fan.value > 0 ? fan.value / 50 : 0} // Adjust the divisor to control max speed
+          progress={fan.value > 0 ? undefined : 0} // Keep at first frame when off
+        />
+        <View style={{
+          ...styles.voiceControlContainer,
+          position: "absolute",
+          top: 10,
+          right: 10,
+        }}>
+          <View style={styles.controlButtonsRow}>
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity

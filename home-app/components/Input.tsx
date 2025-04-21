@@ -1,9 +1,10 @@
-import { PropsWithChildren } from "react";
-import { StyleSheet, Text, TextInput, View, Platform, Dimensions } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { PropsWithChildren, useState } from "react";
+import { StyleSheet, Text, TextInput, View, Platform, Dimensions, TouchableOpacity } from "react-native";
 
 const { width, height } = Dimensions.get("window");
 
-const InputBox = ({
+export const InputBox = ({
   children,
   title,
   data,
@@ -43,11 +44,63 @@ const InputBox = ({
   );
 };
 
-export default InputBox;
+export const InputHiddenBox = ({
+  children,
+  title,
+  data,
+  setData,
+  isEmail,
+  error,
+}: PropsWithChildren & {
+  title: string;
+  data: string;
+  isEmail?: boolean;
+  error?: string;
+  setData: (name: string) => void;
+}) => {
+  const [hidden, setHidden] = useState(true); // State to manage password visibility
+  const value = data;
+  function handleHidden() {
+    setHidden((prev) => !prev); // Toggle password visibility
+  }
+
+  // const handleChangePassword = (password: string) => {
+  //   setPassword(password); // Update password state
+  // };
+
+  return (
+    <View style={styles.container}>
+    <View style={styles.boxTitle}>
+      <Text style={styles.normalText}>{title}</Text>
+      <TouchableOpacity onPress={handleHidden}>
+            <Ionicons
+              name={hidden ? "eye-off" : "eye"}
+              size={15}
+              color={'gray'}
+              style={{paddingTop:4}}
+            />
+        </TouchableOpacity>
+    </View>
+    <View style={styles.boxSpacing}>
+      <TextInput
+        style={[
+          (title == "Password") ? styles.passwordInput : styles.input,
+          error && styles.inputError, // Apply error style if error prop exists
+          Platform.OS === 'ios' ? styles.inputIOS : {}
+        ]}
+        //onChangeText={handleChangeData}
+        value={hidden ? "••••••••••••••••••••••••••" : value}
+        keyboardType={isEmail ? "email-address" : "default"}
+      />
+      {error && <Text style={styles.errorText}>{error}</Text>}
+    </View>
+  </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
-    width: width * 0.85,
+    width: width * 0.9,
     flexDirection: 'row',
     gap: 10,
     justifyContent: 'space-between',
@@ -55,7 +108,13 @@ const styles = StyleSheet.create({
   },
   normalText: {
     color: "black",
-    fontSize: 15
+    fontFamily:'Rubik-Regular',
+    fontSize: height < 900 ? 15 : 20 
+  },
+  boxTitle: {
+    marginBottom: height * 0.009,
+    flexDirection:'row',
+    gap:5
   },
   boxSpacing: {
     marginBottom: height * 0.009,
@@ -100,5 +159,5 @@ const styles = StyleSheet.create({
     color: "red",
     fontSize: 12,
     marginTop: 2,
-  }
+  },
 });
