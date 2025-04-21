@@ -463,7 +463,7 @@ export default function FanDetails() {
       <View style={{ position: "relative" }}>
         <LottieView
           source={require("@/animations/fan.json")}
-          style={{ width: "100%", height: 400 }}
+          style={{ width: "100%", height: height*0.4}}
           autoPlay={fan.value > 0}
           loop={fan.value > 0}
           speed={fan.value > 0 ? fan.value / 50 : 0}
@@ -525,12 +525,13 @@ export default function FanDetails() {
             onSlidingComplete={(value: number) => {
               handleSetFanValue(fan.id, value);
             }}
-            minimumTrackTintColor="#4287f5"
+            minimumTrackTintColor="#2666de"
             maximumTrackTintColor="#e0e0e0"
-            thumbTintColor="#4287f5"
+            thumbTintColor="#ffffff"
+            
             disabled={autoMode}
           />
-
+          
           <TouchableOpacity
             style={styles.sliderButton}
             onPress={handleIncrease}
