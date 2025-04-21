@@ -13,15 +13,15 @@ export const VoiceHint = ({
 
 const styles = StyleSheet.create({
     voiceHint: {
+        backgroundColor:'#ffffff',
         textAlign: "center",
         margin: 50,
         fontSize: 13,
-        borderTopWidth: 1,
-        borderBottomWidth: 2,
-        borderLeftWidth: 2,
-        borderRightWidth: 1,
         padding: 10,
         borderRadius: 8,
-        fontStyle: "italic",
+        fontFamily:'Inter-Light',
+        borderWidth:1,
+        borderColor:'#ffffff',
+        elevation:5
     },
 });

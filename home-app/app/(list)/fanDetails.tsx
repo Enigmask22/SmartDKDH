@@ -1,5 +1,5 @@
-import { View, Text, TouchableOpacity, Platform } from "react-native";
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, TouchableOpacity, Platform, StatusBar, Dimensions } from "react-native";
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Entypo from '@expo/vector-icons/Entypo';
 import { router } from "expo-router";
 import { useState, useEffect } from "react";
@@ -19,6 +19,8 @@ import PowerButton from "@/components/ui/PowerButton";
 import { VoiceHint } from "@/components/ui/VoiceHint";
 import { setSensorValues } from "@/store/sensorSlice";
 import { setAllValues } from "@/store/fanDevicesSlice";
+import { ThemedText } from "@/components/ThemedText";
+const { width, height } = Dimensions.get("window");
 
 const API_BASE_URL = `https://smartdkdh.onrender.com`;
 
@@ -271,19 +273,21 @@ export default function FanDetails() {
   }
   return (
     <View style={{padding:30, backgroundColor:'#f2f6fc'}}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-        >
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>Fan {fan.id}</Text>
-          <Text style={styles.description}>{fan.description || "ABC room"}</Text>
+      <StatusBar backgroundColor="#f2f6fc"/>
+      <View style={styles.titleContainer}>
+        <View style={{flexDirection:'row', width:width}}>
+          <View style={styles.backButton}></View>
+          <View style={styles.title}>
+            <ThemedText type="title" style={{fontSize:25}}> Fan {fan.id}</ThemedText>
+            <Text style={styles.description}>{fan.description || "ABC room"}</Text>
+          </View>
+          <View style={styles.backButton}>
+          <TouchableOpacity onPress={() => router.back()}>
+              <Ionicons name="chevron-forward" size={24} color="black"/>
+          </TouchableOpacity>
+          </View>
         </View>
       </View>
-
       <View style={{
         position: "relative",
       }}>

@@ -10,24 +10,18 @@ const moderateScale = (size: number, factor = 0.5) =>
   size + (scale(size) - size) * factor;
 
 export const styles = StyleSheet.create({
-  header: {
-    position: "relative",
-    display: "flex",
-    flexDirection: "row",
+  titleContainer: {
+    height: height * 0.1,
     alignItems: "center",
-    justifyContent: "center", // Center the header content
-    paddingHorizontal: scale(16),
-    paddingTop: verticalScale(15),
-    paddingBottom: verticalScale(10),
-    width: "100%",
+    marginBottom: 16,
+  },
+  title: {
+    width: width*0.8,
+    flexDirection:'column', 
+    alignItems:'center'
   },
   backButton: {
-    position: "absolute",
-    left: scale(16),
-    top: "50%", // Keep percentage for vertical centering relative to header height
-    // Adjust translateY based on the actual scaled icon size if needed
-    transform: [{ translateY: -moderateScale(12) }],
-    zIndex: 10, // Ensure it's above other elements
+    width:width*0.1,
   },
   headerContent: {
     flex: 1,
@@ -41,12 +35,6 @@ export const styles = StyleSheet.create({
     fontSize: moderateScale(14),
     color: "#666",
     marginTop: verticalScale(4),
-  },
-  titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: scale(8),
-    marginBottom: verticalScale(16),
   },
   serverConfig: {
     marginBottom: verticalScale(16),

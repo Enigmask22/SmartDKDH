@@ -134,9 +134,9 @@ export function Sensor() {
       };
     
       const getSensorIcon = (sensorId: string) => {
-        if (sensorId === "dadn-temp") return <Ionicons name="thermometer-outline" size={24} color="white" />;
-        if (sensorId === "dadn-light") return <Ionicons name="bulb-outline" size={24} color="white" />;
-        if (sensorId === "dadn-humi") return <Feather name="droplet" size={24} color="white" />;
+        if (sensorId === "dadn-temp") return <Ionicons name="thermometer-outline" size={height < 900 ? 24 : 35} color="white" />;
+        if (sensorId === "dadn-light") return <Ionicons name="bulb-outline" size={height < 900 ? 24 : 35} color="white" />;
+        if (sensorId === "dadn-humi") return <Feather name="droplet" size={height < 900 ? 24 : 35} color="white" />;
         return "📊";
       };
 
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
         alignItems:'flex-start',
     },
     text: {
-        fontSize:12,
+        fontSize: height < 900 ? 12 : 14,
         fontWeight:500,
         color:'white'
     }
