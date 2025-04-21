@@ -17,15 +17,15 @@ export const styles = StyleSheet.create({
     height: height * 0.1,
     alignItems: "center",
     marginBottom: 16,
-    paddingTop:scale(20)
+    paddingTop: verticalScale(20),
   },
   title: {
-    width: width*0.8,
-    flexDirection:'column', 
-    alignItems:'center'
+    width: width * 0.8,
+    flexDirection: "column",
+    alignItems: "center",
   },
   backButton: {
-    width:width*0.1,
+    width: width * 0.1,
   },
   addButton: {
     backgroundColor: "#3b82f6",
