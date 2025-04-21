@@ -270,8 +270,7 @@ export default function FanList() {
 
   return (
     <ScrollView style={styles.container}>
-      <StatusBar backgroundColor="#f2f6fc"/>
-      <View style={styles.titleContainer}>
+      {/* <View style={styles.titleContainer}>
         <View style={{flexDirection:'row', width:width}}>
           <View style={styles.backButton}></View>
           <View style={styles.title}>
@@ -283,7 +282,7 @@ export default function FanList() {
           </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </View> */}
       <SummaryCard
         total={devices.length}
         on={onFans}

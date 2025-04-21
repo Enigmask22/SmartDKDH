@@ -16,7 +16,7 @@ import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
 import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
-const { width, height } = Dimensions.get("window"); 
+const { width, height } = Dimensions.get("window");
 
 // ... (interface LogEntry, component LogItem giữ nguyên) ...
 interface LogEntry {
@@ -178,35 +178,35 @@ export const ActivityLogScreen = () => {
 
   return (
     <View style={styles.safeArea}>
-      <ScrollView style={{height:'auto'}} >
-      {/* Hiển thị loading ban đầu khi đang lấy user_no hoặc fetch lần đầu */}
-      {isLoading && !refreshing ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#007AFF" />
-        </View>
-      ) : error ? ( // Hiển thị lỗi nếu có
-        renderError()
-      ) : currentUserNo === null ? ( // Trường hợp không lấy được user_no
-        renderError() // Hoặc một thông báo khác
-      ) : (
-        <FlatList
-          data={logs}
-          renderItem={({ item }) => <LogItem item={item} />}
-          keyExtractor={(item) => item._id}
-          contentContainerStyle={styles.listContainer}
-          ListEmptyComponent={renderEmptyList}
-          scrollEnabled={false} 
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={["#007AFF"]}
-              tintColor={"#007AFF"}
-            />
-          }
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
-        />
-      )}
+      <ScrollView style={{ height: "auto", width: "100%" }}>
+        {/* Hiển thị loading ban đầu khi đang lấy user_no hoặc fetch lần đầu */}
+        {isLoading && !refreshing ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#007AFF" />
+          </View>
+        ) : error ? ( // Hiển thị lỗi nếu có
+          renderError()
+        ) : currentUserNo === null ? ( // Trường hợp không lấy được user_no
+          renderError() // Hoặc một thông báo khác
+        ) : (
+          <FlatList
+            data={logs}
+            renderItem={({ item }) => <LogItem item={item} />}
+            keyExtractor={(item) => item._id}
+            contentContainerStyle={styles.listContainer}
+            ListEmptyComponent={renderEmptyList}
+            scrollEnabled={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={["#007AFF"]}
+                tintColor={"#007AFF"}
+              />
+            }
+            ItemSeparatorComponent={() => <View style={styles.separator} />}
+          />
+        )}
       </ScrollView>
     </View>
   );
@@ -216,8 +216,9 @@ export const ActivityLogScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "#f2f6fc",
     paddingTop: Platform.OS === "android" ? Constants.statusBarHeight : 0,
+    width: "100%",
   },
   header: {
     paddingHorizontal: 16,
@@ -236,10 +237,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#f8f9fa",
+    width: "100%",
   },
   listContainer: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     paddingBottom: 16, // Padding dưới cùng cho list
+    width: "100%",
   },
   logItemContainer: {
     flexDirection: "row",
@@ -249,6 +252,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginVertical: 4, // Khoảng cách giữa các item
     paddingHorizontal: 12,
+    width: "100%",
     // Shadow nhẹ cho iOS
     shadowColor: "#000",
     shadowOffset: {

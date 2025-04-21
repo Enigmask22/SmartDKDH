@@ -10,6 +10,7 @@ import {
   View,
   Button,
   StatusBar,
+  SafeAreaView,
 } from "react-native";
 import { Audio } from "expo-av";
 import Constants from "expo-constants";
@@ -212,34 +213,26 @@ export default function HomeScreen() {
   };
 
   return (
-    <>
-    <StatusBar backgroundColor={'#f2f6fc'} />
-    <View
-      style={{
-        backgroundColor: "#f2f6fc",
-        height: height,
-        alignItems: "center",
-      }}
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#f2f6fc", paddingTop: 50 }}
     >
-      <View style={styles.titleContainer}>
-        <View style={styles.title}>
-          <Feather name="home" size={30} color="black" />
-          <Text style={{ fontSize: 25, fontFamily: "Poppins-SemiBold" }}>
-            {" "}
-            Home
-          </Text>
-        </View>
+      <View
+        style={{
+          backgroundColor: "#f2f6fc",
+          height: height,
+          alignItems: "center",
+        }}
+      >
+        <Info device={getRunningDeviceNumber()} online={userNo != null} />
+        <Sensor />
+        <Devices
+          runningFan={getRunningFanNumber()}
+          availFan={fanDevices.length}
+          runningLed={getRunningLedNumber()}
+          availLed={ledDevices.length}
+        />
       </View>
-      <Info device={getRunningDeviceNumber()} online={userNo != null} />
-      <Sensor />
-      <Devices
-        runningFan={getRunningFanNumber()}
-        availFan={fanDevices.length}
-        runningLed={getRunningLedNumber()}
-        availLed={ledDevices.length}
-      />
-    </View>
-    </>
+    </SafeAreaView>
   );
 }
 
@@ -248,13 +241,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#f2f6fc",
     height: height * 0.12,
     flexDirection: "column",
-    paddingTop: 30,
     alignItems: "center",
     gap: 50,
     marginBottom: 5,
   },
   title: {
     flexDirection: "row",
+    backgroundColor: "#ffff",
+    width: width,
+    height: height * 0.1,
+    // alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 25,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
   },
   titleBox: {
     flexDirection: "row",
