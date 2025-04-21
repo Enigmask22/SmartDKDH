@@ -10,10 +10,6 @@ const moderateScale = (size: number, factor = 0.5) =>
   size + (scale(size) - size) * factor;
 
 export const styles = StyleSheet.create({
-
-  titleContainer: {
-    height: height * 0.1,
-
   container: {
     flex: 1,
     padding: moderateScale(20),
@@ -28,12 +24,12 @@ export const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    width: width*0.8,
-    flexDirection:'column', 
-    alignItems:'center'
+    width: width * 0.8,
+    flexDirection: "column",
+    alignItems: "center",
   },
   backButton: {
-    width:width*0.1,
+    width: width * 0.1,
   },
   headerContent: {
     flex: 1,
@@ -49,7 +45,6 @@ export const styles = StyleSheet.create({
     color: "#666",
     marginTop: verticalScale(4),
   },
-
 
   mainContent: {
     flex: 1,
@@ -172,9 +167,8 @@ export const styles = StyleSheet.create({
     color: "#333",
   },
   titleContainer: {
-    flexDirection: "row",
+    height: height * 0.1,
     alignItems: "center",
-    gap: scale(8),
     marginBottom: verticalScale(16),
   },
 

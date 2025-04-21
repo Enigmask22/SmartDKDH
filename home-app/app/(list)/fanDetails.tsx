@@ -1,9 +1,13 @@
-
-import { View, Text, TouchableOpacity, Platform, StatusBar, Dimensions } from "react-native";
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import Entypo from '@expo/vector-icons/Entypo';
-import { View, Text, TouchableOpacity, Platform, Switch } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Platform,
+  Switch,
+  StatusBar,
+  Dimensions,
+} from "react-native";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import Entypo from "@expo/vector-icons/Entypo";
 import { router } from "expo-router";
 import { useState, useEffect, useRef } from "react";
@@ -24,9 +28,9 @@ import { VoiceHint } from "@/components/ui/VoiceHint";
 import { setSensorValues } from "@/store/sensorSlice";
 import { setAllValues } from "@/store/fanDevicesSlice";
 import { ThemedText } from "@/components/ThemedText";
-const { width, height } = Dimensions.get("window");
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+const { width, height } = Dimensions.get("window");
 const API_BASE_URL = `https://smartdkdh.onrender.com`;
 
 // Các tùy chọn thời gian hẹn giờ (phút)
@@ -432,90 +436,69 @@ export default function FanDetails() {
   if (!fan) {
     return <FanNotFound />;
   }
+
   return (
-    <View style={{padding:30, backgroundColor:'#f2f6fc'}}>
-      <StatusBar backgroundColor="#f2f6fc"/>
+    <View style={{ padding: 30, backgroundColor: "#f2f6fc" }}>
+      <StatusBar backgroundColor="#f2f6fc" />
       <View style={styles.titleContainer}>
-        <View style={{flexDirection:'row', width:width}}>
+        <View style={{ flexDirection: "row", width: width }}>
           <View style={styles.backButton}></View>
           <View style={styles.title}>
-            <ThemedText type="title" style={{fontSize:25}}> Fan {fan.id}</ThemedText>
-            <Text style={styles.description}>{fan.description || "ABC room"}</Text>
+            <ThemedText type="title" style={{ fontSize: 25 }}>
+              {" "}
+              Fan {fan.id}
+            </ThemedText>
+            <Text style={styles.description}>
+              {fan.description || "ABC room"}
+            </Text>
           </View>
           <View style={styles.backButton}>
-          <TouchableOpacity onPress={() => router.back()}>
-              <Ionicons name="chevron-forward" size={24} color="black"/>
-          </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.back()}>
+              <Ionicons name="chevron-forward" size={24} color="black" />
+            </TouchableOpacity>
           </View>
         </View>
       </View>
-      <View style={{
-        position: "relative",
-      }}>
+
+      <View style={{ position: "relative" }}>
         <LottieView
           source={require("@/animations/fan.json")}
           style={{ width: "100%", height: 400 }}
           autoPlay={fan.value > 0}
           loop={fan.value > 0}
-          speed={fan.value > 0 ? fan.value / 50 : 0} // Adjust the divisor to control max speed
-          progress={fan.value > 0 ? undefined : 0} // Keep at first frame when off
+          speed={fan.value > 0 ? fan.value / 50 : 0}
+          progress={fan.value > 0 ? undefined : 0}
         />
-        <View style={{
-          ...styles.voiceControlContainer,
-          position: "absolute",
-          top: 10,
-          right: 10,
-        }}>
-          <View style={styles.controlButtonsRow}>
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
+
+        <View
+          style={{
+            ...styles.voiceControlContainer,
+            position: "absolute",
+            top: 10,
+            right: 10,
+          }}
         >
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>Fan {fan.id}</Text>
-          <Text style={styles.description}>
-            {fan.description || "Living room"}
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.mainContent}>
-        <View style={styles.fanImageContainer}>
-          <LottieView
-            source={require("@/animations/fan.json")}
-            style={styles.fanAnimation}
-            autoPlay={fan.value > 0}
-            loop={fan.value > 0}
-            speed={fan.value > 0 ? fan.value / 50 : 0}
-            progress={fan.value > 0 ? undefined : 0}
-          />
-
-          <View style={styles.voiceControlContainer}>
-            <TouchableOpacity
-              style={[
-                autoMode ? styles.dissabledMicButton : styles.micButton,
-                isListening ? styles.listeningButton : null,
-              ]}
-              onPress={recording ? stopRecording : startRecording}
-              disabled={autoMode}
-            >
-              {autoMode ? (
-                <MaterialIcons name="voice-over-off" size={24} color="#666" />
-              ) : (
-                <MaterialIcons
-                  name="keyboard-voice"
-                  size={24}
-                  color={isListening ? "#ff4444" : "#4CAF50"}
-                />
-              )}
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            style={[
+              autoMode ? styles.dissabledMicButton : styles.micButton,
+              isListening ? styles.listeningButton : null,
+            ]}
+            onPress={recording ? stopRecording : startRecording}
+            disabled={autoMode}
+          >
+            {autoMode ? (
+              <MaterialIcons name="voice-over-off" size={24} color="#666" />
+            ) : (
+              <MaterialIcons
+                name="keyboard-voice"
+                size={24}
+                color={isListening ? "#ff4444" : "#4287f5"}
+              />
+            )}
+          </TouchableOpacity>
         </View>
 
+        {/* Hiển thị giá trị quạt */}
         <View style={styles.fanValueContainer}>
           <Text style={styles.fanValueText}>{fan.value}%</Text>
         </View>
