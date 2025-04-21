@@ -31,7 +31,7 @@ export default function RootLayout() {
     "Rubik-Regular": require("../assets/fonts/Rubik-Regular.ttf"),
     "Crimson-Text-Bold-Italic": require("../assets/fonts/CrimsonText-BoldItalic.ttf"),
     "Crimson-Text-SemiBold": require("../assets/fonts/CrimsonText-SemiBold.ttf"),
-    "Italiana": require("../assets/fonts/Italiana-Regular.ttf"),
+    Italiana: require("../assets/fonts/Italiana-Regular.ttf"),
   });
   const [isReady, setIsReady] = useState(false); // Trạng thái sẵn sàng của app
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null); // Trạng thái đăng nhập (null: đang kiểm tra)
@@ -88,7 +88,7 @@ export default function RootLayout() {
         "user_email",
         "user_password",
         "user_ada",
-        "user_key"
+        "user_key",
       ]);
       setIsLoggedIn(false);
       router.replace("/login");
@@ -134,17 +134,15 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded && isReady && !isConnecting) {
       SplashScreen.hideAsync();
-  
+
       if (isLoggedIn === true) {
         router.replace("/(tabs)");
       } else if (isLoggedIn === false) {
-
         router.replace("/login");
 
         // Đảm bảo người dùng đang ở màn hình login nếu họ chưa đăng nhập
         // @type-ignore
         router.push("/onboarding"); // Hoặc "/login" nếu bạn muốn
-
       }
     }
   }, [loaded, isReady, isConnecting, isLoggedIn, router]); // Chạy lại khi isReady, isLoggedIn hoặc isConnecting thay đổi

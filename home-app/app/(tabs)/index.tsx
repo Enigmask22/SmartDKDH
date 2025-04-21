@@ -13,6 +13,8 @@ import {
   ActivityIndicator,
   Animated,
   Easing,
+  SafeAreaView,
+
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { HelloWave } from "@/components/HelloWave";
@@ -304,6 +306,9 @@ export default function HomeScreen() {
   return (
     <>
       <StatusBar backgroundColor={'#f2f6fc'} />
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#f2f6fc", paddingTop: 50 }}
+    >
       <View
         style={{
           backgroundColor: "#f2f6fc",
@@ -324,6 +329,16 @@ export default function HomeScreen() {
         {renderContent()}
       </View>
     </>
+        <Info device={getRunningDeviceNumber()} online={userNo != null} />
+        <Sensor />
+        <Devices
+          runningFan={getRunningFanNumber()}
+          availFan={fanDevices.length}
+          runningLed={getRunningLedNumber()}
+          availLed={ledDevices.length}
+        />
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -333,13 +348,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#f2f6fc",
     height: height * 0.12,
     flexDirection: "column",
-    paddingTop: 30,
     alignItems: "center",
     gap: 50,
     marginBottom: 5,
   },
   title: {
     flexDirection: "row",
+    backgroundColor: "#ffff",
+    width: width,
+    height: height * 0.1,
+    // alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 25,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
   },
   titleBox: {
     flexDirection: "row",

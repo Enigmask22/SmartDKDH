@@ -476,26 +476,6 @@ export default function FanDetails() {
 
   return (
     <View style={{ padding: 30, backgroundColor: "#f2f6fc" }}>
-      <StatusBar backgroundColor="#f2f6fc" />
-      <View style={styles.titleContainer}>
-        <View style={{ flexDirection: "row", width: width }}>
-          <View style={styles.backButton}></View>
-          <View style={styles.title}>
-            <ThemedText type="title" style={{ fontSize: 25 }}>
-              Fan {fan.id}
-            </ThemedText>
-            <Text style={styles.description}>
-              {fan.description || "ABC room"}
-            </Text>
-          </View>
-          <View style={styles.backButton}>
-            <TouchableOpacity onPress={() => router.back()}>
-              <Ionicons name="chevron-forward" size={24} color="black" />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-
       <View style={{ position: "relative" }}>
         <LottieView
           source={require("@/animations/fan.json")}

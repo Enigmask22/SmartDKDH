@@ -437,24 +437,50 @@ export default function LightList() {
 
   return (
     <ScrollView style={styles.container}>
-      <StatusBar backgroundColor="#f2f6fc"/>
-      <View style={styles.titleContainer}>
-        <View style={{flexDirection:'row', width:width}}>
+      {/* <View style={styles.titleContainer}>
+        <View style={{ flexDirection: "row", width: width }}>
           <View style={styles.backButton}></View>
           <View style={styles.title}>
-            <ThemedText type="title" style={{fontSize:25}}> Smart Light</ThemedText>
+            <ThemedText type="title" style={{ fontSize: 25 }}>
+              {" "}
+              Smart Light
+            </ThemedText>
           </View>
           <View style={styles.backButton}>
-          <TouchableOpacity onPress={() => router.back()}>
-              <Ionicons name="chevron-forward" size={24} color="black"/>
-          </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.back()}>
+              <Ionicons name="chevron-forward" size={24} color="black" />
+            </TouchableOpacity>
           </View>
         </View>
       </View>
       
       {/* Render dynamic content */}
       {renderContent()}
-      
+      </View> */}
+      <SummaryCard
+        type="bulb"
+        total={devices.length}
+        on={onBulbs}
+        off={offBulbs}
+      />
+      <View style={styles.bulbsGrid}>
+        {devices.map((bulb) => (
+          <DeviceCard
+            key={bulb.id}
+            device={{
+              ...bulb,
+              type: "bulb",
+            }}
+          >
+            <Switch
+              trackColor={{ false: "#e0e0e0", true: "#3b82f6" }}
+              thumbColor={"#ffffff"}
+              onValueChange={() => toggleSwitch(bulb.id)}
+              value={bulb.status === "1"}
+            />
+          </DeviceCard>
+        ))}
+      </View>
       <View style={styles.footer}>
         <TouchableOpacity
           style={[
