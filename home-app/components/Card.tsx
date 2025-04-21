@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   statusContainer: {
-    alignItems: "flex-end",
+    alignItems: "center",
   },
   statusText: {
     marginVertical: 2,

@@ -48,10 +48,10 @@ const OnboardingScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center" },
+  container: { flex: 1, justifyContent: "center", alignItems: "center", paddingTop:height*0.09},
   container_top: {
     flex: 1,
-    justifyContent: "flex-end",
+    justifyContent: "flex-end"
   },
   banner_text: {
     fontSize: 80,

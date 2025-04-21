@@ -38,7 +38,7 @@ export function Info(props: Props) {
         <View style={styles.container}>
             <View style={{flex:1, justifyContent:'flex-start', gap: 5}}>
                 <CurrentDate/>
-                <Text style={{fontSize:20, fontWeight:800}}>Smart Home</Text>
+                <Text style={{fontSize:height < 900 ? 20 : 24, fontWeight:800}}>Smart Home</Text>
                 <View style={{flexDirection:'row', gap: 6}}>
                     <View style={props.device != 0 ? styles.onlineIndicator : styles.offlineIndicator} />
                     <Text style={{fontSize:10, fontWeight:500}}>{props.device} devices running</Text>

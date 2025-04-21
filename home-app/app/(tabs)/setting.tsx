@@ -145,9 +145,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     height: height * 0.257,
     flexDirection: "column",
-    padding: 30,
+    padding: 40,
     alignItems: "center",
-    gap: 50,
+    gap: 40,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30
     ,
