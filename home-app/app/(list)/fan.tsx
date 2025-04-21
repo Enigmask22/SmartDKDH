@@ -8,9 +8,11 @@ import {
   Platform,
   StatusBar,
   Dimensions,
+  Animated,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { Feather } from "@expo/vector-icons";
+import { useEffect, useState, useRef } from "react";
 import { router } from "expo-router";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -34,6 +36,110 @@ const { width, height } = Dimensions.get("window");
 
 const API_BASE_URL = `https://smartdkdh.onrender.com`;
 
+
+const SkeletonCard = () => {
+  // Create Skeleton Component for Cards
+  const opacity = useRef(new Animated.Value(0.3)).current;
+
+  useEffect(() => {
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, {
+          toValue: 0.8,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 0.3,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    animation.start();
+
+    return () => {
+      animation.stop();
+    };
+  }, []);
+
+  return (
+    <Animated.View
+      style={[
+        styles.skeletonCardContainer,
+        { opacity }
+      ]}
+    >
+      <View style={styles.skeletonIcon} />
+      <View style={styles.skeletonTitle} />
+      <View style={styles.skeletonSlider} />
+    </Animated.View>
+  );
+};
+
+const SkeletonSummary = () => {
+  // Create Skeleton for Summary Card
+  const opacity = useRef(new Animated.Value(0.3)).current;
+
+  useEffect(() => {
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, {
+          toValue: 0.8,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 0.3,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    animation.start();
+
+    return () => {
+      animation.stop();
+    };
+  }, []);
+
+  return (
+    <Animated.View
+      style={[
+        styles.skeletonSummaryContainer,
+        { opacity }
+      ]}
+    >
+      <View style={styles.skeletonSummaryItem} />
+      <View style={styles.skeletonSummaryItem} />
+      <View style={styles.skeletonSummaryItem} />
+    </Animated.View>
+  );
+};
+
+// Add ErrorState component
+const ErrorState = ({ message, onRetry }: {
+  message?: string;
+  onRetry: () => void;
+}) => {
+  return (
+    <View style={styles.errorContainer}>
+      <Feather size={64} color="#f44336" />
+      <Text style={styles.errorTitle}>Connection Error</Text>
+      <Text style={styles.errorMessage}>{message || "Unable to load fan data"}</Text>
+      <TouchableOpacity
+        style={styles.retryButton}
+        onPress={onRetry}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.retryButtonText}>Try Again</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
 export default function FanList() {
   const [recording, setRecording] = useState<Audio.Recording>();
   const [isListening, setIsListening] = useState(false);
@@ -56,7 +162,6 @@ export default function FanList() {
 
   // WebSocket connection
   useEffect(() => {
-    // const wsUrl = `ws://${serverIp}:8000/ws`;
     const wsUrl = `wss://smartdkdh.onrender.com/ws`;
     const ws = new WebSocket(wsUrl);
 
@@ -233,7 +338,6 @@ export default function FanList() {
         name: "recording.m4a",
       } as any);
 
-      // const url = `http://${serverIp}:8000/speech-to-text`;
       const url = `${API_BASE_URL}/speech-to-text`;
       console.log("Sending to URL:", url);
 
@@ -268,48 +372,73 @@ export default function FanList() {
     }
   }
 
+  const handleRetry = () => {
+    dispatch(fetchFanDevices());
+  };
+
   return (
     <ScrollView style={styles.container}>
-      <StatusBar backgroundColor="#f2f6fc"/>
+      <StatusBar backgroundColor="#f2f6fc" />
       <View style={styles.titleContainer}>
-        <View style={{flexDirection:'row', width:width}}>
+        <View style={{ flexDirection: 'row', width: width }}>
           <View style={styles.backButton}></View>
           <View style={styles.title}>
-            <ThemedText type="title" style={{fontSize:25}}> Smart Fan</ThemedText>
+            <ThemedText type="title" style={{ fontSize: 25 }}> Smart Fan</ThemedText>
           </View>
           <View style={styles.backButton}>
-          <TouchableOpacity onPress={() => router.back()}>
-              <Ionicons name="chevron-forward" size={24} color="black"/>
-          </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.back()}>
+              <Ionicons name="chevron-forward" size={24} color="black" />
+            </TouchableOpacity>
           </View>
         </View>
       </View>
-      <SummaryCard
-        total={devices.length}
-        on={onFans}
-        off={offFans}
-        type="fan"
-      />
-      <View style={styles.fansGrid}>
-        {devices.map((fan) => (
-          <DeviceCard
-            key={fan.id}
-            device={{
-              type: "fan",
-              ...fan,
-            }}
-          >
-            <TouchableOpacity>
-              <Ionicons
-                name="settings-outline"
-                size={20}
-                color="#777"
-                onPress={() => router.push(`/(list)/fanDetails?id=${fan.id}`)}
-              />
-            </TouchableOpacity>
-          </DeviceCard>
-        ))}
-      </View>
+
+      {/* Render content based on loading and error states */}
+      {loading ? (
+        <>
+          <SkeletonSummary />
+          <View style={styles.skeletonGrid}>
+            {[1, 2, 3, 4].map((item) => (
+              <SkeletonCard key={`skeleton-${item}`} />
+            ))}
+          </View>
+        </>
+      ) : error ? (
+        <ErrorState
+          message={typeof error === 'string' ? error : "Could not connect to fan devices"}
+          onRetry={handleRetry}
+        />
+      ) : (
+        <>
+          <SummaryCard
+            total={devices.length}
+            on={onFans}
+            off={offFans}
+            type="fan"
+          />
+          <View style={styles.fansGrid}>
+            {devices.map((fan) => (
+              <DeviceCard
+                key={fan.id}
+                device={{
+                  type: "fan",
+                  ...fan,
+                }}
+              >
+                <TouchableOpacity>
+                  <Ionicons
+                    name="settings-outline"
+                    size={20}
+                    color="#777"
+                    onPress={() => router.push(`/(list)/fanDetails?id=${fan.id}`)}
+                  />
+                </TouchableOpacity>
+              </DeviceCard>
+            ))}
+          </View>
+        </>
+      )}
+
       <View style={styles.footer}>
         <TouchableOpacity
           style={[
@@ -317,7 +446,8 @@ export default function FanList() {
             isListening ? styles.listeningButton : null,
           ]}
           onPress={recording ? stopRecording : startRecording}
-          disabled={autoMode}
+          disabled={Boolean(autoMode || loading || error)} // Convert to boolean explicitly
+          activeOpacity={0.7}
         >
           {autoMode ? (
             <FontAwesome6 name="superpowers" size={24} color="#4CAF50" />
@@ -326,6 +456,7 @@ export default function FanList() {
               name="keyboard-voice"
               size={24}
               color={isListening ? "#ff4444" : "#4CAF50"}
+              style={{ opacity: loading || error || autoMode ? 0.5 : 1 }}
             />
           )}
         </TouchableOpacity>
@@ -340,6 +471,7 @@ export default function FanList() {
               fontSize: 16,
               fontWeight: "bold",
               textAlign: "center",
+              color: loading || error ? "#9e9e9e" : "#000",
             }}
           >
             Auto Mode
@@ -347,17 +479,25 @@ export default function FanList() {
           <Switch
             trackColor={{ false: "#e0e0e0", true: "#3b82f6" }}
             thumbColor={"#ffffff"}
-            // @ts-ignore
-            onValueChange={() => dispatch(toggleAutoMode())}
-            value={autoMode}
-            style={{ transform: [{ scale: 2 }], margin: 6 }} // Adjust the scale factor as needed
+            onValueChange={(value: boolean) => {
+              if (!loading && !error) {
+                dispatch(toggleAutoMode());
+              }
+            }}
+            value={Boolean(autoMode)}
+            disabled={Boolean(loading || error)}
+            style={{ transform: [{ scale: 2 }], margin: 6 }}
           />
         </View>
       </View>
       <VoiceHint>
-        {autoMode
-          ? "Chế độ tự động: Fan sẽ điều chỉnh theo nhiệt độ"
-          : 'Thử nói: "Bật quạt phòng khách", "Tắt quạt số 1" hoặc "Tắt tất cả quạt"'}
+        {loading
+          ? "Đang tải dữ liệu..."
+          : error
+            ? "Không thể kết nối đến thiết bị quạt. Vui lòng thử lại."
+            : autoMode
+              ? "Chế độ tự động: Fan sẽ điều chỉnh theo nhiệt độ"
+              : 'Thử nói: "Bật quạt phòng khách", "Tắt quạt số 1" hoặc "Tắt tất cả quạt"'}
       </VoiceHint>
     </ScrollView>
   );
