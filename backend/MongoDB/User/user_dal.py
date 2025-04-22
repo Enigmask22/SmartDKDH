@@ -144,11 +144,11 @@ class UserDAL:
          # Nếu cập nhật mật khẩu, đảm bảo mật khẩu mới đã được hash.
          # ---
          # Chỉ cập nhật các trường được cung cấp trong user_update_data
-         update_doc = {"$set": user_update_data}
-         # Loại bỏ các trường không nên cập nhật trực tiếp nếu cần (ví dụ: _id, no)
-         update_doc["$set"].pop("_id", None)
-         update_doc["$set"].pop("id", None)
-         update_doc["$set"].pop("no", None)
+         update_dict = user_update_data.copy()
+         update_dict.pop("_id", None)
+         update_dict.pop("id", None)
+         update_dict.pop("no", None)
+         update_doc = {"$set": update_dict}
 
          result_doc = await self._user_collection.find_one_and_update(
              {"no": no},
