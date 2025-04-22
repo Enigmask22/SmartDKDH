@@ -66,16 +66,15 @@ async def get_user(user_no: int, user_dal: UserDAL = Depends(get_user_dal)) -> U
 @router.patch("/{user_no}") # Đường dẫn: "/api/users/{user_no}"
 async def update_user(user_no: int, user_update: UserUpdate, user_dal: UserDAL = Depends(get_user_dal)) -> User:
     """Cập nhật thông tin người dùng."""
-    # Tạo đối tượng User từ dữ liệu cập nhật
-    user_data = User(
-        id="temp_id", # ID tạm thời, không dùng trong DAL update
-        no=user_no,
-        name=user_update.name,
-        email=user_update.email,
-        password=user_update.password, # Cần xem xét mã hóa mật khẩu
-        username_adafruit=user_update.username_adafruit,
-        key_adafruit=user_update.key_adafruit
-    )
+    # Tạo một dictionary từ dữ liệu cập nhật thay vì đối tượng User
+    user_data = {
+        "name": user_update.name,
+        "email": user_update.email,
+        "password": user_update.password, # Cần xem xét mã hóa mật khẩu
+        "username_adafruit": user_update.username_adafruit,
+        "key_adafruit": user_update.key_adafruit
+    }
+    
     updated_user = await user_dal.update_user(user_no, user_data)
     if updated_user is None:
         raise HTTPException(status_code=404, detail=f"Không tìm thấy người dùng với no={user_no} để cập nhật")
