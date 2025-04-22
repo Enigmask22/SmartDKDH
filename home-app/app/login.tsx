@@ -454,7 +454,7 @@ const styles = StyleSheet.create({
     fontFamily:'Poppins-Bold'
   },
   signupLabel: {
-    paddingTop: height * 0.01,
+    paddingTop: height * 0.015,
     flexDirection: "row",
   },
   normalText: {

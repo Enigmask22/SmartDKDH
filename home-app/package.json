@@ -51,11 +51,9 @@
     "react-native-switch-toggle": "^2.2.1",
     "react-native-toggle-element": "^2.1.1",
     "react-native-web": "~0.19.13",
-
-
     "react-redux": "^9.2.0",
-
-    "react-native-webview": "13.12.5"
+    "react-native-webview": "13.12.5",
+    "expo-linear-gradient": "~14.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
