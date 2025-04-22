@@ -11,11 +11,13 @@ export const InputBox = ({
   setData,
   isEmail,
   error,
+  editable = false, // Default to false if not provided
 }: PropsWithChildren & {
   title: string;
   data: string;
   isEmail?: boolean;
   error?: string;
+  editable?: boolean; // Thêm prop này
   setData: (name: string) => void;
 }) => {
   const handleChangeData = (name: string) => {
@@ -32,8 +34,10 @@ export const InputBox = ({
           style={[
             (title == "Password") ? styles.passwordInput : styles.input,
             error && styles.inputError, // Apply error style if error prop exists
-            Platform.OS === 'ios' ? styles.inputIOS : {}
+            Platform.OS === 'ios' ? styles.inputIOS : {},
+            !editable && styles.disabledInput
           ]}
+          editable={editable} // Disable editing if isDisabled is true
           onChangeText={handleChangeData}
           value={(["Password", "AIO_KEY", "AIO_USERNAME" ].find(e => e == title)) ? "••••••••••••••••••••••••••" : data}
           keyboardType={isEmail ? "email-address" : "default"}
@@ -51,12 +55,14 @@ export const InputHiddenBox = ({
   setData,
   isEmail,
   error,
+  editable = false, // Default to false if not provided
 }: PropsWithChildren & {
   title: string;
   data: string;
   isEmail?: boolean;
   error?: string;
   setData: (name: string) => void;
+  editable?: boolean; // Thêm prop này
 }) => {
   const [hidden, setHidden] = useState(true); // State to manage password visibility
   const value = data;
@@ -86,8 +92,10 @@ export const InputHiddenBox = ({
         style={[
           (title == "Password") ? styles.passwordInput : styles.input,
           error && styles.inputError, // Apply error style if error prop exists
-          Platform.OS === 'ios' ? styles.inputIOS : {}
+          Platform.OS === 'ios' ? styles.inputIOS : {},
+          !editable && styles.disabledInput
         ]}
+        editable={editable} // Disable editing if isDisabled is true
         //onChangeText={handleChangeData}
         value={hidden ? "••••••••••••••••••••••••••" : value}
         keyboardType={isEmail ? "email-address" : "default"}
@@ -159,5 +167,10 @@ const styles = StyleSheet.create({
     color: "red",
     fontSize: 12,
     marginTop: 2,
+  },
+  // Thêm style này vào StyleSheet
+  disabledInput: {
+    backgroundColor: '#f5f5f5',
+    color: '#777',
   },
 });
