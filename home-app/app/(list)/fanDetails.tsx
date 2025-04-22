@@ -29,6 +29,7 @@ import { setSensorValues } from "@/store/sensorSlice";
 import { setAllValues } from "@/store/fanDevicesSlice";
 import { ThemedText } from "@/components/ThemedText";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useLayoutEffect } from "react";
 
 const { width, height } = Dimensions.get("window");
 const API_BASE_URL = `https://smartdkdh.onrender.com`;
@@ -67,10 +68,27 @@ export default function FanDetails() {
   const sensor = useSelector((state: RootState) => state.sensor);
 
   // Load timer state from AsyncStorage on component mount
+  // useEffect(() => {
+  //   if (fan?.id) {
+  //     loadTimerState();
+  //   }
+  // }, [fan?.id]);
+
+  // Trong useEffect đầu tiên chạy khi component mount
   useEffect(() => {
     if (fan?.id) {
       loadTimerState();
+
+      // Lưu thông tin fan hiện tại vào AsyncStorage
+      AsyncStorage.setItem('current_fan_id', fan.id);
+      AsyncStorage.setItem('current_fan_name', `Fan ${fan.id}` || fan.description || '');
     }
+
+    // Cleanup khi unmount
+    return () => {
+      AsyncStorage.removeItem('current_fan_id');
+      AsyncStorage.removeItem('current_fan_name');
+    };
   }, [fan?.id]);
 
   // Save timer state to AsyncStorage whenever it changes
@@ -617,7 +635,7 @@ export default function FanDetails() {
                   style={[
                     styles.timerOption,
                     selectedTimer === option.value &&
-                      styles.timerOptionSelected,
+                    styles.timerOptionSelected,
                   ]}
                   onPress={() => handleTimerSelect(option.value)}
                   disabled={autoMode}
@@ -626,7 +644,7 @@ export default function FanDetails() {
                     style={[
                       styles.timerOptionText,
                       selectedTimer === option.value &&
-                        styles.timerOptionTextSelected,
+                      styles.timerOptionTextSelected,
                     ]}
                   >
                     {option.label}
