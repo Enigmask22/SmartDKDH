@@ -1,6 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { PropsWithChildren, useState } from "react";
-import { StyleSheet, Text, TextInput, View, Platform, Dimensions, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  Platform,
+  Dimensions,
+  TouchableOpacity,
+} from "react-native";
 
 const { width, height } = Dimensions.get("window");
 
@@ -32,14 +40,14 @@ export const InputBox = ({
       <View style={styles.boxSpacing}>
         <TextInput
           style={[
-            (title == "Password") ? styles.passwordInput : styles.input,
+            title == "Password" ? styles.passwordInput : styles.input,
             error && styles.inputError, // Apply error style if error prop exists
-            Platform.OS === 'ios' ? styles.inputIOS : {},
-            !editable && styles.disabledInput
+            Platform.OS === "ios" ? styles.inputIOS : {},
+            !editable && styles.disabledInput,
           ]}
           editable={editable} // Disable editing if isDisabled is true
           onChangeText={handleChangeData}
-          value={(["Password", "AIO_KEY", "AIO_USERNAME" ].find(e => e == title)) ? "••••••••••••••••••••••••••" : data}
+          value={title === "Password" ? "••••••••••••••••••••••••••" : data}
           keyboardType={isEmail ? "email-address" : "default"}
         />
         {error && <Text style={styles.errorText}>{error}</Text>}
@@ -66,63 +74,64 @@ export const InputHiddenBox = ({
 }) => {
   const [hidden, setHidden] = useState(true); // State to manage password visibility
   const value = data;
+
   function handleHidden() {
     setHidden((prev) => !prev); // Toggle password visibility
   }
 
-  // const handleChangePassword = (password: string) => {
-  //   setPassword(password); // Update password state
-  // };
+  const handleChangeData = (text: string) => {
+    setData(text); // Gọi hàm setData để cập nhật giá trị
+  };
 
   return (
     <View style={styles.container}>
-    <View style={styles.boxTitle}>
-      <Text style={styles.normalText}>{title}</Text>
-      <TouchableOpacity onPress={handleHidden}>
-            <Ionicons
-              name={hidden ? "eye-off" : "eye"}
-              size={15}
-              color={'gray'}
-              style={{paddingTop:4}}
-            />
+      <View style={styles.boxTitle}>
+        <Text style={styles.normalText}>{title}</Text>
+        <TouchableOpacity onPress={handleHidden}>
+          <Ionicons
+            name={hidden ? "eye-off" : "eye"}
+            size={15}
+            color={"gray"}
+            style={{ paddingTop: 4 }}
+          />
         </TouchableOpacity>
+      </View>
+      <View style={styles.boxSpacing}>
+        <TextInput
+          style={[
+            title == "Password" ? styles.passwordInput : styles.input,
+            error && styles.inputError, // Apply error style if error prop exists
+            Platform.OS === "ios" ? styles.inputIOS : {},
+            !editable && styles.disabledInput,
+          ]}
+          editable={editable} // Disable editing if isDisabled is true
+          onChangeText={handleChangeData}
+          value={hidden ? "••••••••••••••••••••••••••" : value}
+          keyboardType={isEmail ? "email-address" : "default"}
+        />
+        {error && <Text style={styles.errorText}>{error}</Text>}
+      </View>
     </View>
-    <View style={styles.boxSpacing}>
-      <TextInput
-        style={[
-          (title == "Password") ? styles.passwordInput : styles.input,
-          error && styles.inputError, // Apply error style if error prop exists
-          Platform.OS === 'ios' ? styles.inputIOS : {},
-          !editable && styles.disabledInput
-        ]}
-        editable={editable} // Disable editing if isDisabled is true
-        //onChangeText={handleChangeData}
-        value={hidden ? "••••••••••••••••••••••••••" : value}
-        keyboardType={isEmail ? "email-address" : "default"}
-      />
-      {error && <Text style={styles.errorText}>{error}</Text>}
-    </View>
-  </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     width: width * 0.9,
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 10,
-    justifyContent: 'space-between',
-    alignItems: 'center'
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   normalText: {
     color: "black",
-    fontFamily:'Rubik-Regular',
-    fontSize: height < 900 ? 15 : 20 
+    fontFamily: "Rubik-Regular",
+    fontSize: height < 900 ? 15 : 20,
   },
   boxTitle: {
     marginBottom: height * 0.009,
-    flexDirection:'row',
-    gap:5
+    flexDirection: "row",
+    gap: 5,
   },
   boxSpacing: {
     marginBottom: height * 0.009,
@@ -136,11 +145,11 @@ const styles = StyleSheet.create({
     borderColor: "black",
     paddingHorizontal: 15,
     fontSize: 16,
-    fontFamily: 'Rubik-Regular',
+    fontFamily: "Rubik-Regular",
     color: "#333",
     // Cross-platform fixes
-    textAlignVertical: 'center', // For Android
-    paddingVertical: 0 // Remove default vertical padding
+    textAlignVertical: "center", // For Android
+    paddingVertical: 0, // Remove default vertical padding
   },
   passwordInput: {
     width: width * 0.5,
@@ -149,16 +158,16 @@ const styles = StyleSheet.create({
     borderColor: "black",
     paddingHorizontal: 15,
     fontSize: 16,
-    fontFamily: 'Rubik-Regular',
+    fontFamily: "Rubik-Regular",
     color: "#333",
     // Cross-platform fixes
-    textAlignVertical: 'center', // For Android
-    paddingVertical: 0 // Remove default vertical padding
+    textAlignVertical: "center", // For Android
+    paddingVertical: 0, // Remove default vertical padding
   },
   // iOS-specific fixes
   inputIOS: {
     lineHeight: Math.round(height * 0.05), // Match with height
-    paddingTop: Platform.OS === 'ios' ? Math.round(height * 0.012) : 0, // Adjust based on your height
+    paddingTop: Platform.OS === "ios" ? Math.round(height * 0.012) : 0, // Adjust based on your height
   },
   inputError: {
     borderColor: "red",
@@ -170,7 +179,7 @@ const styles = StyleSheet.create({
   },
   // Thêm style này vào StyleSheet
   disabledInput: {
-    backgroundColor: '#f5f5f5',
-    color: '#777',
+    backgroundColor: "#f5f5f5",
+    color: "#777",
   },
 });
