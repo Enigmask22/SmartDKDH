@@ -55,16 +55,11 @@ async def init_db():
         # Đọc biến môi trường
         retrieved_uri = os.getenv("MONGODB_URI")
 
-        # Log giá trị đọc được
-        logger.info(f"--- Vercel Log: Value from os.getenv('MONGODB_URI'): {retrieved_uri}")
+        # Không log giá trị URI (chứa credentials), chỉ log trạng thái
+        logger.info(f"--- Vercel Log: MONGODB_URI is {'SET' if retrieved_uri else 'MISSING'}")
 
-        # Sử dụng giá trị đọc được hoặc fallback
-        mongo_uri = retrieved_uri or "mongodb+srv://REMOVED:REMOVED@REMOVED.mongodb.net/"
-
-        # Log giá trị URI cuối cùng sẽ được sử dụng
-        if not retrieved_uri:
-            logger.warning("--- Vercel Log: WARNING - Failed to read MONGODB_URI from environment, using default!")
-        logger.info(f"--- Vercel Log: Using MongoDB URI: {'FROM ENV VAR' if retrieved_uri else 'FROM DEFAULT VALUE'}")
+        # Bắt buộc cấu hình qua biến môi trường, không có fallback hardcode
+        mongo_uri = retrieved_uri
 
         db_name = os.getenv("DATABASE_NAME", "yolohome")
         logger.info(f"--- Vercel Log: DATABASE_NAME: {db_name}")
